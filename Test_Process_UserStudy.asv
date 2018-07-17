@@ -5,7 +5,7 @@ addpath(genpath(getenv('ARMA_CL')))
 addpath(genpath(getenv('ECLDIR')))
 cpd_dir=getenv('CPDREG');
 organDir=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
-addpath(genpath('R:\Robots\CPD_Reg.git\userstudy_data\'))
+
 % Bag folder
 bagFolder='user52new/';
 % Create bag objects
@@ -60,7 +60,6 @@ plot3(palpout.psm_grip.x,palpout.psm_grip.y,palpout.psm_grip.z,'r*')
 
 
 %% Kidney B
-load('Palp_out')
 % HOrgan=readTxtReg('user53/PSM2PhantomReg_UserStudy.txt');
 % HOrgan=readTxtReg('user53/testPSM2Phantom.txt');
 robPosns=[0.0138716380604 -0.0353429420436 -0.0351697119807 0.0115195207286
