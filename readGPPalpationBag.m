@@ -1,4 +1,4 @@
-function output=readGPBag(PalpBag,plotoption)
+function output=readGPPalpationBag(PalpBag,plotoption)
 if nargin<2
     plotoption=1;
 end
@@ -9,7 +9,8 @@ end
 % grip_close_list=[grip_close_read{:}];
 % grip_close=[[grip_close_list.Data]',grip_close_time];
 
-stiff_loc_topic=select(GPBag,'Topic','/dvrk/MTMR_PSM2/selected_stiff_locations','Time', [GPBag.StartTime GPBag.EndTime])
+stiff_loc_topic=select(PalpBag,'Topic','/dvrk/MTMR_PSM2/selected_stiff_locations','Time', [PalpBag.StartTime PalpBag.EndTime]);
+
 
 
 grip_pinch_topic =  select(PalpBag,'Topic','/dvrk/MTMR/gripper_pinch_event','Time', [PalpBag.StartTime PalpBag.EndTime]);

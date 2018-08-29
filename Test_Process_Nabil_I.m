@@ -1,39 +1,42 @@
-% clear
-% close all
-% clc
+clear
+close all
+clc
 addpath(genpath(getenv('ARMA_CL')))
 addpath(genpath(getenv('ECLDIR')))
 cpd_dir=getenv('CPDREG');
 organDir=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 addpath(genpath('R:\Robots\CPD_Reg.git\userstudy_data\'))
 % Bag folder
-bagFolder='user1/';
-bagFolder='user14_Nabil_testablate/'
+bagFolder='R:\Projects\NRI\User_Study\Data\Bags\user14_Nabil_testablate\';
 % Create bag objects
 
 %%
-VisualBag=rosbag([bagFolder 'Following_Visual_2018-07-30-11-00-23_0.bag']);
-VFBag=rosbag([bagFolder 'Following_DirectForce_2018-07-30-11-01-55_0.bag']);
-FullVFBag=rosbag([bagFolder 'Following_HybridForce_2018-07-30-11-03-12_0.bag']);
-PalpBag=rosbag([bagFolder 'Palpation_DirectForce_2018-07-30-11-04-50_0.bag']);
-GPBag=rosbag([bagFolder 'Palpation_VisualForce_2018-07-30-11-05-44_0.bag']);
+VisualBag1=rosbag([bagFolder 'Following_DirectForce_2018-08-24-12-28-13_0.bag']);
+VisualBag2=rosbag([bagFolder 'Following_DirectForce_2018-08-24-12-32-13_1.bag']);
+VisualBag3=rosbag([bagFolder 'Following_DirectForce_2018-08-24-12-36-13_2.bag']);
+VisualBag4=rosbag([bagFolder 'Following_Visual_2018-08-24-12-13-42_0.bag']);
+VisualBag5=rosbag([bagFolder 'Following_Visual_2018-08-24-12-17-42_1.bag']);
+VisualBag6=rosbag([bagFolder 'Following_Visual_2018-08-24-12-18-45_0.bag']);
+VisualBag7=rosbag([bagFolder 'Following_Visual_2018-08-24-12-24-06_0.bag']);
+
+% VFBag=rosbag([bagFolder 'Following_DirectForce_2018-07-30-11-01-55_0.bag']);
+% FullVFBag=rosbag([bagFolder 'Following_HybridForce_2018-07-30-11-03-12_0.bag']);
+% PalpBag=rosbag([bagFolder 'Palpation_DirectForce_2018-07-30-11-04-50_0.bag']);
+% GPBag=rosbag([bagFolder 'Palpation_VisualForce_2018-07-30-11-05-44_0.bag']);
 
 bagFolder='user1/';
 %% Look at visual motion
-output=readVisualArteryBag(VisualBag);
-output2=readVisualArteryBag(VFBag);
-output3=readVisualArteryBag(FullVFBag);
-save('VF_out','output','output2','output3')
+output=readVisualArteryBag(VisualBag1);
 
-%% Palpation output
-palpout=readPalpationBag(PalpBag);
-GPpalpout=readGPPalpationBag(GPBag);
+output=readVisualArteryBag(VisualBag1,VisualBag2,VisualBag3);
+% output2=readVisualArteryBag(VFBag);
+% output3=readVisualArteryBag(FullVFBag);
+save('nabil_artery_out','output','output2','output3')
 
-save('Palp_out','palpout','newpalpout');
 %% Find points of organ and curve
-load('VF_out')
+load('nabil_artery_out')
 % Find registration
-HOrgan=readTxtReg('user52/PSM2PhantomReg_UserStudy.txt');
+HOrgan=readTxtReg([bagFolder '/PSM2PhantomReg_UserStudy_1535130666549802064.txt']);
 
 % Load Organ and register to robot frame
 temp=load([organDir filesep 'Kidney_A_iter_100_NoOpt.mat']);
