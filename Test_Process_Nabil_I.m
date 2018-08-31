@@ -26,12 +26,29 @@ VisualBag7=rosbag([bagFolder 'Following_Visual_2018-08-24-12-24-06_0.bag']);
 
 bagFolder='user1/';
 %% Look at visual motion
-output=readVisualArteryBag(VisualBag1);
 
 output=readVisualArteryBag(VisualBag1,VisualBag2,VisualBag3);
+output2=readVisualArteryBag(VisualBag4,VisualBag5);
+output3=readVisualArteryBag(VisualBag6,VisualBag7);
 % output2=readVisualArteryBag(VFBag);
 % output3=readVisualArteryBag(FullVFBag);
 save('nabil_artery_out','output','output2','output3')
+%%
+for i=1:7
+    BagCell{i}=eval(['VisualBag' num2str(i)]);
+end
+
+for i=1:length(BagCell)
+    camera_topic=select(BagCell{i},'Topic','/dvrk/footpedals/camera','Time', [BagCell{i}.StartTime BagCell{i}.EndTime]);
+    cammsg=camera_topic.readMessages;
+    if length(cammsg)
+        camTime{i}=camera_topic.MessageList.Time;
+        camStruct=[cammsg{:}];
+        button{i}=[camStruct.Buttons];
+    end
+end
+    
+% TRIM BASED ON BUTTONS!
 
 %% Find points of organ and curve
 load('nabil_artery_out')

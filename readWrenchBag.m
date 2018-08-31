@@ -1,7 +1,16 @@
 function structOut=readWrenchBag(rawWrench)
-structOut.time=rawWrench.MessageList.Time;
+if iscell(rawWrench)
+    structOut.time=[];
+    rawWrenchMsg=[];
+    for ii=1:length(rawWrench)
+        structOut.time=[structOut.time;rawWrench{ii}.MessageList.Time];
+        rawWrenchMsg=[rawWrenchMsg;rawWrench{ii}.readMessages];
+    end
+else    
+    structOut.time=rawWrench.MessageList.Time;
+    rawWrenchMsg=rawWrench.readMessages;
+end
 
-rawWrenchMsg=rawWrench.readMessages;
 rawWrenchList=[rawWrenchMsg{:}];
 rawWrenchListB=[rawWrenchList.Wrench];
 rawForceList=[rawWrenchListB.Force];

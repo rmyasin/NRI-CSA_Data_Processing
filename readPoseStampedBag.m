@@ -1,7 +1,16 @@
 function structOut=readPoseStampedBag(topicList)
-structOut.time=topicList.MessageList.Time;
+if iscell(topicList)
+    structOut.time=[];
+    poses=[];
+    for ii=1:length(topicList)
+        structOut.time=[structOut.time;topicList{ii}.MessageList.Time];
+        poses=[poses;topicList{ii}.readMessages];
+    end
+else    
+    structOut.time=topicList.MessageList.Time;
+    poses=topicList.readMessages;
+end
 
-poses=topicList.readMessages;
 poseList=[poses{:}];
 
 myP=[poseList.Pose];
