@@ -9,7 +9,7 @@ addpath(genpath('R:\Robots\CPD_Reg.git\userstudy_data\'))
 % Bag folder
 bagFolder='R:\Projects\NRI\User_Study\Data\Bags\user14_Nabil_testablate\';
 % Create bag objects
-
+tic
 %%
 VisualBag1=rosbag([bagFolder 'Following_DirectForce_2018-08-24-12-28-13_0.bag']);
 VisualBag2=rosbag([bagFolder 'Following_DirectForce_2018-08-24-12-32-13_1.bag']);
@@ -49,7 +49,7 @@ for i=1:length(BagCell)
 end
     
 % TRIM BASED ON BUTTONS!
-
+toc
 %% Find points of organ and curve
 load('nabil_artery_out')
 % Find registration

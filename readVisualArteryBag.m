@@ -1,7 +1,6 @@
 function output=readVisualArteryBag(varargin)
 startTime=varargin{1}.StartTime;
 
-tic
 lock_time=[];
 for ii=1:nargin
     BagName=varargin{ii};
@@ -19,7 +18,7 @@ for ii=1:nargin
     
     lock_time=[lock_time;lock_orientation_topic.MessageList.Time];
 end
-toc
+
 % Read robot motion
 output.psm_cur=readPoseStampedBag(psm_cur_topic);
 output.psm_des=readPoseStampedBag(psm_des_topic);
