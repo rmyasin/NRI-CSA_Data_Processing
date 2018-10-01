@@ -3,7 +3,7 @@
 % organNum: number between 1 and 6 of the desired organ to register
 % mm: if true, inPoints are in mm, otherwise in meters
 
-function [kidneyReg, points] = registerOrgan(inPoints,organNum,mm)
+function [kidneyReg, points,HOrgan] = registerOrgan(inPoints,organNum,mm)
 if nargin<3
     mm=true; %
 end

@@ -9,9 +9,9 @@ clc
 
 folder='R:\Projects\NRI\User_Study\Data\txtFile\';
 % filename='MicronRobRegSept8.txt';
-filename='MicronRobRegSept12.txt';
-
-
+% filename='MicronRobRegSept12.txt';
+filename='RobRegNewJSept15.txt';
+% filename='RobRegNewJIISept15.txt';
 labelList=[51,52,50,53];
 
 baseLabel=60; %Automatically apply base frame offset using label 60
@@ -48,6 +48,11 @@ registeredPoints=R*micronPos(:,1:3)'+t;
 
 %% Read the path following data
 filename='Follow1Sept12.txt';
+filename='HelixSept16.txt';
+% HelixRehomeSept16.txt
+% HelixRehomeIISept16.txt
+% HelixOrientSept16.txt
+
 [cur1,des1,micron1]=readRobTxt(folder,filename,baseLabel); % Read the raw data and apply base offset
 tipFollow1=getMicronTip(micron1,a); % Get Tip Pose
 endIndices1=find(diff(abs(sign(diff(des1.pos(:,1)))))>0);
@@ -104,7 +109,7 @@ figure
 plot(tipTotal.time,tipTotal.tip)
 hold on
 plot(desTime(2:end),micronPos(:,1:3),'ko')
-% plot(desTime,micron53Match(:,1:3),'rx')
+
 %% Plot rotations of all frames
 % close all
 % lab1=tipTotal.label==50;

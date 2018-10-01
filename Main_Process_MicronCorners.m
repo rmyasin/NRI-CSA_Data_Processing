@@ -7,7 +7,6 @@ clc
 % marker). 
 
 labelList=[51,52,50,53];
-baseLabel=60;
 
 folder='R:\Projects\NRI\User_Study\Data\txtFile\';
 filename='MicronCornerCalib_Sept7_II.txt';
@@ -54,7 +53,7 @@ end
 fidFolder='R:\Robots\CPD_Reg.git\userstudy_data\FiducialLocations\';
 fidLoc=load([fidFolder 'FiducialLocations_1']);
 aCT=fidLoc.FidLoc;
-basePoints=[baseNew{:}];
+basePoints=[baseNew{:}]
 [R,t] = rigidPointRegistration(aCT,basePoints(1:3,:));
 Micron2CT=transformation(R,t);
 

@@ -1,10 +1,10 @@
-function [cur,des,micron]=readRobTxt(folder,filename,baseLabel)
+function [cur,des,micron,joint]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
 
 robfile=fopen([folder filename]);
-titleList={'psm_cur','psm_des','micron'};
+titleList={'psm_cur','psm_des','micron','psm_joint'};
 line=fgetl(robfile);
 
 cur.time=[];
@@ -12,6 +12,8 @@ cur.pos=[];
 des.time=[];
 des.pos=[];
 microndat=[];
+joint.time=[];
+joint.q=[];
 
 while line~=-1
     temp=find(strcmp(line,titleList));
@@ -28,6 +30,11 @@ while line~=-1
                 des.pos=[des.pos;numLine(2:end)];
             case 3
                 microndat=[microndat;numLine];
+            case 4
+                if length(numLine)>1 %If full data written, save data
+                    joint.time=[joint.time;numLine(1)];
+                    joint.q=[joint.q;numLine(2:end)];
+                end
         end
     end
     line=fgetl(robfile);
