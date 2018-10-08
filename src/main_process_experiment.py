@@ -26,48 +26,64 @@ def locateInList(inlist,element):
 		if inlist[i]==element:
 			return i
 
+filename= 'testOutput'
+bagFolder = '/home/arma/catkin_ws/data/user24/'
+findBag='Palpation_DirectForce_2018-10-02-11-27-20_0.bag'
 
-# os.listdir()
-bagFolder='/home/arma/catkin_ws/data/user14_Nabil_testablate/'
+# MAKE THIS INTO A FUNCTION FOR FINDING ALL BAGS OF A CERTAIN FORMAT IN A FOLDER!
+dateEnd=findBag.rfind('_')
+dateStart=dateEnd-19
+matchName=findBag[0:dateStart]
+regexbag=re.compile('^'+matchName)
+
+
 fileList=os.listdir(bagFolder) 
+newList=filter(regexbag.match,fileList)
+bagNumbers=[temp[-5] for temp in newList]
 
 
- ############################## Pick the filename to save and the bag name ##############################
-# filename="NabilAug24_Visual1"
-# regexbag=re.compile('^Following_Visual_2018-08-24-12-\w\w-42_\w.*\.bag')
+dateList=list()
+numberList=list()
+for temp in newList:
+	dotIndex=temp.rfind('.')
+	dateEnd=temp.rfind('_')
+	dateStart=dateEnd-19
+	dateList.append(temp[dateStart:dateEnd])
+	numberList.append(temp[dateEnd+1:dotIndex])
+tupleList=zip(dateList,numberList,newList)
+sortedTuple=sorted(tupleList, key=lambda entry:map(int, entry[0].split('-')))
 
-# filename="NabilAug24_Visual2"
-# regexbag=re.compile('^Following_Visual_2018-08-24-12-18-45_0.bag')
+bagList=[findBag]
+found =0
+for curTuple in sortedTuple:
+	if found>0:
+		if curTuple[1] == '0':
+			found=-1
+		else:
+			bagList.append(curTuple[2])
+	if curTuple[2]==findBag:
+		found=1
 
-# filename="NabilAug24_Visual3"
-# regexbag=re.compile('^Following_Visual_2018-08-24-12-24-06_0.bag')
- ############################## ############################## ##############################
-
-filename="NabilAug24_Direct"
-regexbag=re.compile('^Following_DirectForce_2018-08-24-12-.*\.bag')
-
-
-newlist=filter(regexbag.match,fileList)
-ipdb.set_trace()
-bagNumbers=[temp[-5] for temp in newlist]
-
-orderedList=list()
-for i in range(len(bagNumbers)):
-	orderedList.append(locateInList(bagNumbers,str(i)))
-
-dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[]}
-timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[]}
+dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
+timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
 topicNames= {	'force':	'/dvrk/PSM2/wrench',
 				'psm_cur':	'/dvrk/PSM2/position_cartesian_current',
 				'mtm_cur':	'/dvrk/MTMR/position_cartesian_current',
 				'camera' :	'/dvrk/footpedals/camera',
+				'psm_des': 	'/dvrk/PSM2/position_cartesian_desired',
+				'micronTip' :	'/MicronTipPose',
+				'psm_joint':'/dvrk/PSM2/state_joint_current',
+				'A' :		'/A',
+				'B' :		'/B',
+				'C' :		'/C',
+				'D' :		'/D',
+				'Ref' :		'/Ref',
 			}
 
 topicList=topicNames.values()
 
-for i in orderedList:
-	bagname = newlist[i]
-	bag = rosbag.Bag(bagFolder +bagname)
+for bagName in bagList:
+	bag = rosbag.Bag(bagFolder +bagName)
 	for topic, msg, t in bag.read_messages(topics=topicList):
 		if topic == topicNames['force']:
 			dataLists['force'].append([msg.wrench.force.x,msg.wrench.force.y,msg.wrench.force.z])
@@ -81,11 +97,23 @@ for i in orderedList:
 		elif topic == topicNames['camera']:
 			dataLists['camera'].append(msg.buttons)
 			timeLists['camera'].append(t)
+		elif topic == topicNames['psm_des']:
+			dataLists['psm_des'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z])
+			timeLists['psm_des'].append(t)
+		elif topic == topicNames['micronTip']:
+			dataLists['micronTip'].append([msg.pose.position.x,msg.pose.position.y,msg.pose.position.z,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.header.seq])
+			timeLists['micronTip'].append(t)
+		elif topic == topicNames['A'] or topic == topicNames['B'] or topic == topicNames['C'] or topic == topicNames['D'] or topic == topicNames['Ref']:
+			# ipdb.set_trace()
+			dataLists['micron'].append([msg.pose.position.x,msg.pose.position.y,msg.pose.position.z,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.header.frame_id,msg.header.seq])
+			timeLists['micron'].append(t)
+		elif topic == topicNames['psm_joint']:
+			dataLists['psm_joint'].append(list(msg.position))
+			timeLists['psm_joint'].append(t)
 
-# ipdb.set_trace()
-f=open(filename+'.txt','w')
-
-for topicName in topicNames.keys():
+f=open('txt_output/'+filename+'.txt','w')
+f.write('Version 2\n')
+for topicName in dataLists.keys():
 	f.write(topicName+'\n')
 	for i in range(len(dataLists[topicName])):
 		f.write(str(timeLists[topicName][i])+" "+" ".join(str(x) for x in dataLists[topicName][i]) +"\n")
