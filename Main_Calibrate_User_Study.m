@@ -1,18 +1,11 @@
 % Overview
-% Methods needed for using micron optical tracker calibrated properly
-
-% Required repositories
-% % % % % % % % % % % % % % % % % % % % % % % % % % 
-% Continuous palpation: https://github.com/wanglong06/continuous_palpation
-% Processing:  arma.vuse.vanderbilt.edu:/ftp/projects/NRI-Large/User_study/Data_Processing.git
-% % % % % % % % % % % % % % % % % % % % % % % % % % 
-
-% Data Collection for continuous palpation
-% During each experiment, "roslaunch continuous_palpation path_following.launch filename:=bagNameToSave"
+% Main file used in calibrations before starting NRI-CSA user study
+% This repo is located at:  https://github.com/rmyasin/NRI-CSA_Data_Processing
 
 % Data Processing
-% After an experiment has been run, run "micron_processing.py" and change
-% the bagname and filename for the output (lines ### and ####)
+% After a bag of an experiment has been saved, run
+% "micron_processing.py -b bagname -f textFileOutput"
+% for the bagname and filename for the input/output
 
 % Step 0: Physical Setup
 % -Make sure force sensor is set somewhere rigidly and attached to the new
@@ -40,19 +33,14 @@ dataFolder=[fileparts(mfilename('fullpath')) filesep 'txtFile' filesep];
 % markers on the micron probe attachment, must pivot each face in a divot
 % and save frames that show each pair of adjacent markers
 pivotFilename='MicronTipCalibOct4.txt';
-subIndex=[1:80];
+subIndex=[1:80]; % Sometimes data can get corrupted, in which case, you can choose a subset of the data to use
 tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename,subIndex);
-% This also saves the tip calibration to "tip_calibration"
-
-%% Step 2A: Find the offset of the microntracker markers from the robot kinematics
-% % micron_robot_tip='MicronRobotTip_Sept19.txt';
-% % 
-% % tipInRobot = endEffectorCalibration(dataFolder,micron_robot_tip);
-% % % When step 2A is done, update the local json file with the tip offset
-% % % according to the robot kinematics
-% % % For example, at VU, this looks like: 
+% This saves the tip calibration to "tip_calibration"
 
 %% Step 2: Register the micron tracker to the robot
+% Make sure to update the local json file with the new tip offset
+% % % For example, at VU, this looks like: 
+
 % Main_Micron2Rob_Registration
 micron2robFilename='RobRegNewJSept15.txt';
 plotOption=1;

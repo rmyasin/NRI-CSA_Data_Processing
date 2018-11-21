@@ -1,0 +1,24 @@
+# Marker Number
+marker_1:
+# Tip Position
+  pos: [0.254822, -29.975351, 10.089953]
+# Tip Orientation [w x y z]
+  quat: [1.000000, 0.000000, 0.000000, 0.000000]
+# Marker Number
+marker_2:
+# Tip Position
+  pos: [-0.482112, -29.560334, 9.259185]
+# Tip Orientation [w x y z]
+  quat: [0.694936, 0.002849, -0.718944, -0.013266]
+# Marker Number
+marker_3:
+# Tip Position
+  pos: [-0.612455, 29.779331, 9.718252]
+# Tip Orientation [w x y z]
+  quat: [0.007633, 0.999918, 0.003318, -0.009746]
+# Marker Number
+marker_4:
+# Tip Position
+  pos: [0.720114, 30.002158, 9.967190]
+# Tip Orientation [w x y z]
+  quat: [0.694936, -0.002849, 0.718944, 0.013266]
