@@ -26,44 +26,51 @@ def locateInList(inlist,element):
 		if inlist[i]==element:
 			return i
 
+
+def getMatchingRosBags(folder,bagName):
+	dateEnd=bagName.rfind('_') 
+	dateStart=dateEnd-19
+	matchName=bagName[0:dateStart] # Find beginning string of the bag
+	regexbag=re.compile('^'+matchName) # Find all bags with the same string
+
+	fileList=os.listdir(folder) 
+	newList=filter(regexbag.match,fileList)
+	bagNumbers=[temp[-5] for temp in newList]
+
+	# Find the dates of all bags in the folder and sort by date
+	dateList=list()
+	numberList=list()
+	for temp in newList:
+		dotIndex=temp.rfind('.')
+		dateEnd=temp.rfind('_')
+		dateStart=dateEnd-19
+		dateList.append(temp[dateStart:dateEnd])
+		numberList.append(temp[dateEnd+1:dotIndex])
+	tupleList=zip(dateList,numberList,newList)
+	sortedTuple=sorted(tupleList, key=lambda entry:map(int, entry[0].split('-')))
+
+	# Add the bags to the list of bags to process in date order
+	bagList=[bagName]
+	found =0
+	for curTuple in sortedTuple:
+		if found>0:
+			if curTuple[1] == '0':
+				found=-1
+			else:
+				bagList.append(curTuple[2])
+		if curTuple[2]==bagName:
+			found=1
+	return bagList
+
+
 filename= 'testOutput'
 bagFolder = '/home/arma/catkin_ws/data/user24/'
 findBag='Palpation_DirectForce_2018-10-02-11-27-20_0.bag'
 
-# MAKE THIS INTO A FUNCTION FOR FINDING ALL BAGS OF A CERTAIN FORMAT IN A FOLDER!
-dateEnd=findBag.rfind('_')
-dateStart=dateEnd-19
-matchName=findBag[0:dateStart]
-regexbag=re.compile('^'+matchName)
+# Find all bags in a sequence of auto-saved bags
+bagList=getMatchingRosBags(bagFolder,findBag)
 
-
-fileList=os.listdir(bagFolder) 
-newList=filter(regexbag.match,fileList)
-bagNumbers=[temp[-5] for temp in newList]
-
-
-dateList=list()
-numberList=list()
-for temp in newList:
-	dotIndex=temp.rfind('.')
-	dateEnd=temp.rfind('_')
-	dateStart=dateEnd-19
-	dateList.append(temp[dateStart:dateEnd])
-	numberList.append(temp[dateEnd+1:dotIndex])
-tupleList=zip(dateList,numberList,newList)
-sortedTuple=sorted(tupleList, key=lambda entry:map(int, entry[0].split('-')))
-
-bagList=[findBag]
-found =0
-for curTuple in sortedTuple:
-	if found>0:
-		if curTuple[1] == '0':
-			found=-1
-		else:
-			bagList.append(curTuple[2])
-	if curTuple[2]==findBag:
-		found=1
-
+# Set up lists of data to save and corresponding topics
 dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
 timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
 topicNames= {	'force':	'/dvrk/PSM2/wrench',
@@ -82,6 +89,7 @@ topicNames= {	'force':	'/dvrk/PSM2/wrench',
 
 topicList=topicNames.values()
 
+# Fill lists of each data type
 for bagName in bagList:
 	bag = rosbag.Bag(bagFolder +bagName)
 	for topic, msg, t in bag.read_messages(topics=topicList):
@@ -111,6 +119,7 @@ for bagName in bagList:
 			dataLists['psm_joint'].append(list(msg.position))
 			timeLists['psm_joint'].append(t)
 
+# Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
 f=open('txt_output/'+filename+'.txt','w')
 f.write('Version 2\n')
 for topicName in dataLists.keys():
@@ -118,4 +127,3 @@ for topicName in dataLists.keys():
 	for i in range(len(dataLists[topicName])):
 		f.write(str(timeLists[topicName][i])+" "+" ".join(str(x) for x in dataLists[topicName][i]) +"\n")
 f.close()
-

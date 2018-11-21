@@ -1,13 +1,13 @@
 % Overview
-% Methods needed for using micron optical tracker 
+% Methods needed for using micron optical tracker calibrated properly
 
 % Required repositories
 % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% Continuous palpation: 
-% Processing: 
+% Continuous palpation: https://github.com/wanglong06/continuous_palpation
+% Processing:  arma.vuse.vanderbilt.edu:/ftp/projects/NRI-Large/User_study/Data_Processing.git
 % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-% Data Collection
+% Data Collection for continuous palpation
 % During each experiment, "roslaunch continuous_palpation path_following.launch filename:=bagNameToSave"
 
 % Data Processing
@@ -21,13 +21,13 @@
 % the workspace where it won't move relative to the force sensor
 % -3D print the micron probe attachment, and glue ABCD paper-printed micron
 % markers to the 4 faces so, looking from the top, they look like:
-%  ---B---
+%  ---C---
 % |       |
-% D       C
+% D       B
 % |       |
 %  ---A---
-% For consistency, have the short "vector" of the marker point away from
-% the tip
+% For consistency, have the short "vector" of the marker point towards
+% the tip of the probe
 
 clear
 close all
@@ -56,13 +56,6 @@ tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename);
 % % For example, at VU, this looks like: 
 
 %% Step 2: Register the micron tracker to the robot
-
-
-
-
-% % % % % % % % % % % % % % % % % 
-% TODO: LINK CODE FOR RASTER SCAN TO REGISTER ROBOT
-% % % % % % % % % % % % % % % % % 
 
 % Main_Micron2Rob_Registration
 micron2robFilename='RobRegNewJSept15.txt';
