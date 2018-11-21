@@ -33,30 +33,26 @@ clear
 close all
 clc
 
-dataFolder='R:\Projects\NRI\User_Study\Data\txtFile\';
+dataFolder=[fileparts(mfilename('fullpath')) filesep 'txtFile' filesep];
 
 %% Step 1: Micron Calibration
 % Perform pivot calibration and find relative transforms between the
 % markers on the micron probe attachment, must pivot each face in a divot
 % and save frames that show each pair of adjacent markers
-pivotFilename='MicronTipCalib_Sept7.txt';
-% % % % 
-% NOTE: there's a workaround at line 83 for data corruption at VU
-% % % % 
-tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename);
+pivotFilename='MicronTipCalibOct4.txt';
+subIndex=[1:80];
+tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename,subIndex);
 % This also saves the tip calibration to "tip_calibration"
 
-
 %% Step 2A: Find the offset of the microntracker markers from the robot kinematics
-% micron_robot_tip='MicronRobotTip_Sept19.txt';
-% 
-% tipInRobot = endEffectorCalibration(dataFolder,micron_robot_tip);
-% % When step 2A is done, update the local json file with the tip offset
-% % according to the robot kinematics
-% % For example, at VU, this looks like: 
+% % micron_robot_tip='MicronRobotTip_Sept19.txt';
+% % 
+% % tipInRobot = endEffectorCalibration(dataFolder,micron_robot_tip);
+% % % When step 2A is done, update the local json file with the tip offset
+% % % according to the robot kinematics
+% % % For example, at VU, this looks like: 
 
 %% Step 2: Register the micron tracker to the robot
-
 % Main_Micron2Rob_Registration
 micron2robFilename='RobRegNewJSept15.txt';
 plotOption=1;
@@ -70,13 +66,17 @@ robot_H_micron = register_micron_PSM(dataFolder, micron2robFilename,plotOption);
 organFilenames={'OrganRegNewJSept15.txt';
                 'RegOrganBSept16.txt'};
 organNumbers=[1,2];
+
+% organFilenames={'CornerLocs_Oct4.txt'};
+% organNumbers=1;
+
 % DO ANOTHER ONE OF THESE WITH THE OTHER ORGAN JUST TO SHOW HOW IT WORKS,
 % EVEN THOUGH IT'S NOT NECESSARY
 
 % % % % % % % % 
 % % Run this 1x per experiment to pick the times when you are at each 
 % fiducial point during the experiment
-% plotExperiment(dataFolder,organFilenames);
+plotExperiment(dataFolder,organFilenames);
 % % % % % % % % 
 
 regTimes(1).pts=1:730;
