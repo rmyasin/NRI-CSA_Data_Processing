@@ -9,7 +9,6 @@ from sensor_msgs.msg import JointState
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import PoseStamped
-from enum import Enum
 from cisst_msgs.msg import prmCartesianImpedanceGains
 
 import os
