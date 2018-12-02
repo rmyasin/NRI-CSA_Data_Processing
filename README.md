@@ -35,6 +35,28 @@ At the end, the file tip_calibration.yaml should be created. That will be saved 
 
 TODO: add an option in launch files for MicronTracking.py so that each site can have a unique tip_calibration.yaml file
 
+## Attaching to the PSM
+To attach the probe to the robot, run (in 2 terminal windows): 
+
+```
+roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch
+rostopic echo /dvrk/PSM2/position_cartesian_current
+```
+
+Make sure the rotation orientation is close to when attaching
+x: 0.7071
+y: 0.7071
+z: 0.0
+w: 0.0
+ You know you're in the wrong (rotated by 180) configuration if the quaternion y is negative.
+
+ The robot should look like this, but there are 2 options, so check that topic:
+
+<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/micron_attach_pose.jpg" alt="attachment_pose" width="200"/>
+
+## Json Updates for New Probe
+**TODO: UPDATE LOCAL JSON FILES FOR DVRK KINEMATICS**
+
 # Processing Data Collected During User Study
 TODO
 
