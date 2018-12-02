@@ -32,7 +32,10 @@ dataFolder=[fileparts(mfilename('fullpath')) filesep 'txtFile' filesep];
 % Perform pivot calibration and find relative transforms between the
 % markers on the micron probe attachment, must pivot each face in a divot
 % and save frames that show each pair of adjacent markers
-pivotFilename='MicronTipCalibOct4.txt';
+
+% txt file from 'rosrun nri_csa_processing main_process_experiment.py bagname -o txtfilename'
+% pivotFilename='MicronTipCalibOct4.txt';
+pivotFilename='/home/arma/catkin_ws/src/processing.git/data/tipCalibration1130/tipA.txt';
 subIndex=[1:80]; % Sometimes data can get corrupted, in which case, you can choose a subset of the data to use
 tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename,subIndex);
 % This saves the tip calibration to "tip_calibration"

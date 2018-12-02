@@ -5,7 +5,7 @@ end
 titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip'};
 
 
-robfile=fopen([folder filename]);
+robfile=fopen([folder filesep filename])
 line=fgetl(robfile);
 if length(line)>6 && strcmp(line(1:7),'Version')
     vProtocol=str2num(line(9:end));
@@ -14,8 +14,8 @@ else
     vProtocol=1;
 end
 
-micronNames={'micronA','micronB','micronC','micronD','micronRef'};
-foundLabels=[50,51,52,53,60];
+micronNames={'micronA','micronB','micronC','micronD','micronRef','PROBE_A','PROBE_B','PROBE_C','PROBE_D','Ref'};
+foundLabels=[50,51,52,53,60,50,51,52,53,60];
 
 cur.time=[];
 cur.pos=[];
@@ -102,7 +102,8 @@ if ~isempty(microndat)
         micron(index).pos=microndat(indices,2:4);
         micron(index).quatraw=microndat(indices,5:8);
         rot=quat2rotm(micron(index).quatraw);
-        micron(index).rot=permute(rot,[2,1,3]); %Transpose the rotation which is opposite to what we'd expect
+%         micron(index).rot=permute(rot,[2,1,3]); %Transpose the rotation which is opposite to what we'd expect
+micron(index).rot=rot;
         micron(index).pose=[[micron(index).rot,reshape(micron(index).pos',3,1,[])];repmat([0,0,0,1],1,1,size(micron(index).pos,1))];
     end
     
