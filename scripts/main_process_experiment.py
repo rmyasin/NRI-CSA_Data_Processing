@@ -81,7 +81,7 @@ def main():
   else:
     rpack=rospkg.RosPack()
     processpath=rpack.get_path('nri_csa_processing')
-    outFolderPath = os.path.abspath(os.path.join(processpath,'data')
+    outFolderPath = os.path.abspath(os.path.join(processpath,'data'))
 
   if args.output:
     filename = args.output

@@ -17,12 +17,22 @@
 % D: 53
 % Base Marker: 60
 
-function tip_calibration = pivot_calibration_micron(filefolder, fileName,subIndex)
+clear
+close all
+filefolder='/home/arma/catkin_ws/src/processing.git/data/tipCalibration1130/';
+filenames={'Atip.txt','Btip.txt','Ctip.txt','Dtip.txt','AB.txt','BC.txt','CD.txt','DA.txt'}
+% function tip_calibration = pivot_calibration_multifile(filefolder, fileNames)
+
+% SEEMS TO BE A PROBLEM WITH CD, AND MAYBE DA, BUT MAY BE OK, NEED
+% INVESTIGATION
+
+
 labelList=[50,51,52,53]; % List order A, B, C, D, frame rotation matches A
 
-[~,~,micron,~,vProtocol]=readRobTxt(filefolder,fileName);
 
-for ii=1:length(labelList)
+for ii=1:4
+    [~,~,micron,~,vProtocol]=readRobTxt(filefolder,filenames{ii});
+    
     index=[micron.label]==labelList(ii);
     pos=micron(index).pos;
     
@@ -36,8 +46,8 @@ for ii=1:length(labelList)
     Rmat=micron(index).rot(:,:,~badIndex);
     
     %Remember micron gives the transpose of what I expect, so need to transpose Rmat
-    [tipLoc(:,ii),baseLoc,centerPtList]=calibrateTool(pos,Rmat); 
-
+    [tipLoc(:,ii),baseLoc,centerPtList]=calibrateTool(pos,Rmat);
+    
     figure(1)
     plot3(pos(:,1),pos(:,2),pos(:,3),'.')
     hold on
@@ -48,15 +58,21 @@ for ii=1:length(labelList)
     [Center,~] = fitSphere(pos);
     plot3(Center(1),Center(2),Center(3),'ko')
     axis equal
-
+    
     errorFit=sqrt(sum((centerPtList-meanCenter).^2));
-
+    
     figure(2)
     subplot(2,2,ii)
     plot(errorFit)
     xlabel('Experiment Progress');
     ylabel('Error (mm)')
     title('Pivot Center Error')
+    
+end
+
+for ii=1:4
+    [~,~,micron,~,vProtocol]=readRobTxt(filefolder,filenames{ii+4});
+    
     %% Find the differential pose
     if ii==length(labelList)
         nextLabel=labelList(1);
@@ -67,26 +83,24 @@ for ii=1:length(labelList)
     M1=micron(index);
     M2=micron(nextIndex);
     
-    switch vProtocol 
+    switch vProtocol
         case 1
             frame1=M1.frame;
             frame2=M2.frame;
             [~,idF1,idF2] = intersect(frame1,frame2);
-
+            
             R1= M1.rot(:,:,idF1);
             R2= M2.rot(:,:,idF2);
         case 2
             time1=(M1.time-M1.time(1))/1E9;
             time2=(M2.time-M1.time(1))/1E9;
             
-            timeMat=repmat(time1,1,size(time2,1))-repmat(time2',size(time1,1),1);
-            timeMat(timeMat<0)=1;
+            timeMat=abs(repmat(time1,1,size(time2,1))-repmat(time2',size(time1,1),1));
             [timediff,in]=min(timeMat,[],2);
             idF1=find(timediff<0.1);
             idF2=in(timediff<0.1);
             R1=M1.rot(:,:,idF1);
             R2=M2.rot(:,:,idF2);
-            
     end
     
     d12=zeros(3,length(idF1));
@@ -95,7 +109,7 @@ for ii=1:length(labelList)
     H2=zeros(4,4,length(idF1));
     H12=zeros(4,4,length(idF1));
     
-    for jj=1:length(idF1)        
+    for jj=1:length(idF1)
         R12(:,:,jj)=R1(:,:,jj)'*R2(:,:,jj);
         % From AX=B, X=A-1 B, and definition of inverse homogeneous
         % transform, dx=R1' d2 - R1' d1
@@ -106,8 +120,8 @@ for ii=1:length(labelList)
         H12(:,:,jj)=inv(H1(:,:,jj))*H2(:,:,jj);
     end
     
-%     Plot the differential transform to see outliers, trim them using
-%     subIndex variable
+    %     Plot the differential transform to see outliers, trim them using
+    %     subIndex variable
     figure
     for first=1:3
         for second=1:3
@@ -120,31 +134,18 @@ for ii=1:length(labelList)
         end
     end
     
-    figure
-    for first=1:3
-        for second=1:3
-            if exist('subIndex','var')
-                plot(squeeze(R1(first,second,subIndex)));
-            else
-                plot(squeeze(R1(first,second,:)));
-            end
-            hold on
-        end
-    end
-    
-    if exist('subIndex','var')
-        R12Ave=averageRotations(H12(1:3,1:3,subIndex));
-        HNextMarker(:,:,ii)=transformation(R12Ave,mean(H12(1:3,4,subIndex),3));
-    else
-        R12Ave=averageRotations(H12(1:3,1:3,:));
-        HNextMarker(:,:,ii)=transformation(R12Ave,mean(H12(1:3,4,:),3));
-    end
-
-
+    % if exist('subIndex','var')
+    %     R12Ave=averageRotations(H12(1:3,1:3,subIndex));
+    %     HNextMarker(:,:,ii)=transformation(R12Ave,mean(H12(1:3,4,subIndex),3));
+    % else
+    R12Ave=averageRotations(H12(1:3,1:3,:));
+    HNextMarker(:,:,ii)=transformation(R12Ave,mean(H12(1:3,4,:),3));
+    % end
 end
 
+
 % Loop error going around the 'circle'
-loopError=HNextMarker(:,:,1)*HNextMarker(:,:,2)*HNextMarker(:,:,3)*HNextMarker(:,:,4);
+loopError=HNextMarker(:,:,1)*HNextMarker(:,:,2)*HNextMarker(:,:,3)*HNextMarker(:,:,4)
 
 H_TipFrame(:,:,1)=transformation(eye(3),tipLoc(:,1));
 H_TipFrame(:,:,2)=transformation(HNextMarker(1:3,1:3,1)',tipLoc(:,2));
@@ -172,4 +173,5 @@ tip_calibration.tipLoc=tipLoc;
 tip_calibration.labelList=labelList;
 tip_calibration.HNextMarker=HNextMarker;
 tip_calibration.H_TipFrame=H_TipFrame;
-end
+
+% end
