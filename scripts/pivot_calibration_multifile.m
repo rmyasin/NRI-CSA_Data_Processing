@@ -26,9 +26,7 @@ filenames={'Atip.txt','Btip.txt','Ctip.txt','Dtip.txt','AB.txt','BC.txt','CD.txt
 % SEEMS TO BE A PROBLEM WITH CD, AND MAYBE DA, BUT MAY BE OK, NEED
 % INVESTIGATION
 
-
 labelList=[50,51,52,53]; % List order A, B, C, D, frame rotation matches A
-
 
 for ii=1:4
     [~,~,micron,~,vProtocol]=readRobTxt(filefolder,filenames{ii});

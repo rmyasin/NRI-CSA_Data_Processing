@@ -4,24 +4,27 @@ close all
 addpath(genpath(getenv('ECLDIR'))) % get quatlib
 
 addpath(genpath('Utilities'))
-fidFolder='R:\Robots\CPD_Reg.git\userstudy_data\FiducialLocations';
+% fidFolder='R:\Robots\CPD_Reg.git\userstudy_data\FiducialLocations';
+fidFolder='/home/arma/catkin_ws/src/cpd-registration/userstudy_data/FiducialLocations';
 addpath(fidFolder)
 for ii=1:6
     load(['FiducialLocations_' num2str(ii)]);
     fiducials{ii}=FidLoc/1000;
 end
 
-filenames={'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPts.txt'
-           'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPtsJHU.txt';};
-
+% filenames={'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPts.txt'
+%            'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPtsJHU.txt';};
+filenames={'/home/arma/catkin_ws/src/processing.git/data/PSMRegPts.txt'
+           '/home/arma/catkin_ws/src/processing.git/data/PSMRegPtsJHU.txt'}
 p_VU_python = [-0.10604732 -0.18797096 -0.10305663]';
 q_VU_python = [-0.39879553163917775 0.002071089312541772 0.9169612234797171 0.011830011338348219];
-% q_VU_python = [q_VU_python(end) q_VU_python(1:3)];
+q_VU_python = [q_VU_python(end) q_VU_python(1:3)];
 R_VU_python = quat2rot(q_VU_python);
 H_VU_python = transformation(R_VU_python,p_VU_python);
 
 p_JHU_python=[-0.0187626 -0.21715984 -0.02998706]';
 q_JHU_python=[-0.394798918529 0.121035768 0.83727644 -0.358402456];
+q_JHU_python = [q_JHU_python(end) q_JHU_python(1:3)];
 R_JHU_python = quat2rot(q_JHU_python);
 H_JHU_python = transformation(R_JHU_python,p_JHU_python);
 
