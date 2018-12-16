@@ -150,7 +150,7 @@ H_TipFrame(:,:,2)=transformation(HNextMarker(1:3,1:3,1)',tipLoc(:,2));
 test1=(HNextMarker(1:3,1:3,1)*HNextMarker(1:3,1:3,2))';
 test2=HNextMarker(1:3,1:3,3)*HNextMarker(1:3,1:3,4);
 H_TipFrame(:,:,3)=transformation(averageRotations(test1(1:3,1:3),test2(1:3,1:3)),tipLoc(:,3));
-H_TipFrame(:,:,4)=transformation(HNextMarker(1:3,1:3,1),tipLoc(:,4));
+H_TipFrame(:,:,4)=transformation(HNextMarker(1:3,1:3,4),tipLoc(:,4));
 
 %% Save mat file and yaml file
 save('tip_calibration','tipLoc','labelList','HNextMarker','H_TipFrame')
