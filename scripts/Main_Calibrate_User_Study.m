@@ -35,7 +35,7 @@ dataFolder=[fileparts(mfilename('fullpath')) filesep 'txtFile' filesep];
 
 % txt file from 'rosrun nri_csa_processing main_process_experiment.py bagname -o txtfilename'
 % pivotFilename='MicronTipCalibOct4.txt';
-dataFolder='/home/arma/catkin_ws/src/processing.git/scripts/txt_output';
+dataFolder='/home/mshahba3/catkin_ws/src/NRI-CSA_Data_Processing/scripts/txt_output';
 pivotFilename='VUTipDec2.txt';
 % subIndex=[1:80]; % Sometimes data can get corrupted, in which case, you can choose a subset of the data to use
 tip_calibration = pivot_calibration_micron(dataFolder ,pivotFilename);

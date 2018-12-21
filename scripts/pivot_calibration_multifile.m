@@ -19,7 +19,7 @@
 
 clear
 close all
-filefolder='/home/arma/catkin_ws/src/processing.git/data/tipCalibration1130/';
+filefolder='/home/mshahba3/catkin_ws/src/NRI-CSA_Data_Processing/scripts/txt_output';
 filenames={'Atip.txt','Btip.txt','Ctip.txt','Dtip.txt','AB.txt','BC.txt','CD.txt','DA.txt'}
 % function tip_calibration = pivot_calibration_multifile(filefolder, fileNames)
 
