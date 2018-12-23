@@ -5,7 +5,7 @@ end
 titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip'};
 
 
-robfile=fopen([folder filesep filename])
+robfile=fopen([folder filesep filename]);
 line=fgetl(robfile);
 if length(line)>6 && strcmp(line(1:7),'Version')
     vProtocol=str2num(line(9:end));
@@ -67,7 +67,7 @@ while line~=-1
                 mtm.pos=[mtm.pos;numLine(2:end)];
             case 7
                 force.time=[force.time;numLine(1)];
-                force.data=[force;numLine(2:end)];
+                force.data=[force.data;numLine(2:end)];
             case 8
                 micronTip.time=[micronTip.time;numLine(1)];
                 micronTip.pos=[micronTip.pos;numLine(2:4)];
@@ -102,35 +102,35 @@ if ~isempty(microndat)
         micron(index).pos=microndat(indices,2:4);
         micron(index).quatraw=microndat(indices,5:8);
         rot=quat2rotm(micron(index).quatraw);
-%         micron(index).rot=permute(rot,[2,1,3]); %Transpose the rotation which is opposite to what we'd expect
-micron(index).rot=rot;
+        micron(index).rot=rot;
         micron(index).pose=[[micron(index).rot,reshape(micron(index).pos',3,1,[])];repmat([0,0,0,1],1,1,size(micron(index).pos,1))];
     end
     
-    
-    if baseLabel>=0 % Perform premultiplication by the inverse of the base marker
-        base=micron([micron.label]==baseLabel);
-        basePose=base.pose;
-        
-        for index=1:nLab
-            if foundLabels(index)~=baseLabel
-                for jj=1:size(micron(index).pose,3)
-                    matchFrame=micron(index).frame(jj);
-                    if isempty(find(base.frame>matchFrame,1))
-                        curBase=basePose(:,:,end);
-                    elseif find(base.frame>matchFrame,1)==1
-                        curBase=basePose(:,:,1);
-                    else
-                        curBase=basePose(:,:,find(base.frame>matchFrame,1)-1);
-                    end
-                    poseB(:,:,jj)=invtrans(curBase)*micron(index).pose(:,:,jj);
-                end
-                micron(index).pose=poseB;
-                micron(index).pos=squeeze(micron(index).pose(1:3,4,:))';
-                micron(index).rot=micron(index).pose(1:3,1:3,:);
-            end
-        end
-    end
+    %TODO: FINISH THIS - PROTOCOL CURRENTLY DOESN'T MATCH JHU ANYWAY, SO
+    %MAYBE BEST TO DROP THIS AND PICK BACK UP AFTER UNIFYING
+%     if baseLabel>=0 % Perform premultiplication by the inverse of the base marker
+%         base=micron([micron.label]==baseLabel);
+%         basePose=base.pose;
+%         
+%         for index=1:nLab
+%             if foundLabels(index)~=baseLabel
+%                 for jj=1:size(micron(index).pose,3)
+%                     matchFrame=micron(index).frame(jj);
+%                     if isempty(find(base.frame>matchFrame,1))
+%                         curBase=basePose(:,:,end);
+%                     elseif find(base.frame>matchFrame,1)==1
+%                         curBase=basePose(:,:,1);
+%                     else
+%                         curBase=basePose(:,:,find(base.frame>matchFrame,1)-1);
+%                     end
+%                     poseB(:,:,jj)=invtrans(curBase)*micron(index).pose(:,:,jj);
+%                 end
+%                 micron(index).pose=poseB;
+%                 micron(index).pos=squeeze(micron(index).pose(1:3,4,:))';
+%                 micron(index).rot=micron(index).pose(1:3,1:3,:);
+%             end
+%         end
+%     end
 else
     micron=[];
 end

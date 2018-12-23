@@ -55,10 +55,24 @@ w: 0.0
 <img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/micron_attach_pose.jpg" alt="attachment_pose" width="200"/>
 
 ## Json Updates for New Probe
-**TODO: UPDATE LOCAL JSON FILES FOR DVRK KINEMATICS**
+We apply a constant tip offset to the end of the gripper to make the kinematics match with the tip of the actual probe. The default gripper distance is 10.2 mm, which is the distance from the center of rotation of the jaws to the tip of the large needle driver. The default is found in psm-large-needle-driver.json.json
+
+We need to edit that to create psm-large-needle-driver_micron_probe.json which has an offset to match probe_micron_v5 which has an additional offset of 11 mm to the center of the probe (for a total of 22.2 mm). 
+
+For future calculations, remember that the spherical probe itself has a radius of 3.2 mm, and that the end-effector location should be the center of the sphere.
+ 
+If we think it's necessary, this could be calibrated by, after performing pivot calibration of the probe, rotating the robot's end-effector about the jaw and finding the distance from that axis of the measured tip points.
+
+The json files for the kinematics are located at:
+catkin_ws/src/cisst-saw-nri/sawIntuitiveResearchKit/share
 
 # Processing Data Collected During User Study
-TODO
+1) Save data in a rosbag (preferably by using rosrun dvrk_nri_robot StudyControl.py)
+2) (optional) Change the GP parameters in GP.cpp located in nri/sawNRIModelFW/components/code
+3) (if optional) run catkin build
+4) rosbag play name_of_saved_bag
+5) rosrun csa_ros_applications gp_online -p PSM2
+5) run a visualizer (eg [Preetham's Matlab script](https://git.lcsr.jhu.edu/nri-csa/nri/blob/devel/sawNRIModelFW/matlab/ral_demo_online.m)  )
 
 # Processing Continuous Palpation Data
 If you take data from the [continuous palpation]() repository, ... TODO

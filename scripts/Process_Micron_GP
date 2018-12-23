@@ -1,0 +1,11 @@
+
+folder = '/home/arma/catkin_ws/data/user20/';
+filename = 'Palpation_result.txt';
+baseLabel=60; %Automatically apply base frame offset using label 60
+[cur,des,micron,joint,vProtocol,micronTip]=readRobTxt(folder,filename,baseLabel); % Read the raw data
+
+micronTip; % Reported in ref marker frame. 
+% THIS MEANS THAT REGISTRATION ALSO HAS TO BE DONE IN REF FRAME (I think it
+% is, but we should check to make sure)
+
+

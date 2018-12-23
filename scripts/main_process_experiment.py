@@ -75,22 +75,20 @@ def main():
   parser.add_argument("-o","--output",help="output file name",type=str)
   parser.add_argument("-f","--folder",help="output folder path",type=str)
   args=parser.parse_args()
+  
+  findBag=args.bag#eg 'Palpation_DirectForce_2018-10-02-11-27-20_0.bag'
+  folderPath=os.path.abspath(os.path.join(findBag,'..'));
+
 
   if args.folder:
     outFolderPath=args.folder
   else:
-    rpack=rospkg.RosPack()
-    processpath=rpack.get_path('nri_csa_processing')
-    outFolderPath = os.path.abspath(os.path.join(processpath,'data'))
+    outFolderPath = folderPath
 
   if args.output:
     filename = args.output
   else:
-    filename= 'testOutput'
-  
-  findBag=args.bag#'Palpation_DirectForce_2018-10-02-11-27-20_0.bag'
-  folderPath=os.path.abspath(os.path.join(findBag,'..'));
-
+    filename= findBag[:-4]
   # Find all bags in a sequence of auto-saved bags
   bagList=getMatchingRosBags(folderPath,findBag)
 

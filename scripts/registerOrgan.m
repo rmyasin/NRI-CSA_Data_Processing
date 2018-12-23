@@ -1,18 +1,18 @@
 % Inputs
 % inPoints: 3x4 matrix of fiducial locations A, B, C, D
 % organNum: number between 1 and 6 of the desired organ to register
-% mm: if true, inPoints are in mm, otherwise in meters
+% b_mm: if true, inPoints are in mm, otherwise in meters
 
-function [kidneyReg, points,HOrgan] = registerOrgan(inPoints,organNum,mm)
+function [kidneyReg, points,HOrgan] = registerOrgan(inPoints,organNum,b_mm)
 if nargin<3
-    mm=true; %
+    b_mm=true; %
 end
 kidneyLetter=char(64+organNum); %A, B, C, D, E, F
 
 %% Register kidney to a set of points
 fidFolder='R:\Robots\CPD_Reg.git\userstudy_data\FiducialLocations\';
 load([fidFolder 'FiducialLocations_' num2str(organNum)],'FidLoc');
-if ~mm
+if ~b_mm
     FidLoc=FidLoc/1000; % Convert location to meters
 end
 
@@ -24,7 +24,7 @@ cpd_dir=getenv('CPDREG');
 organDir=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 plyDir = [cpd_dir filesep 'userstudy_data' filesep 'PLY' filesep];
 temp=load([organDir filesep 'Kidney_' kidneyLetter '_iter_100_NoOpt.mat']);
-if ~mm
+if ~b_mm
     kidneyPointsRaw=temp.T.Y/1000';
 else
     kidneyPointsRaw=temp.T.Y';
@@ -36,14 +36,14 @@ kidneyReg=HOrgan*kidneyHomog;
 % return Artery Points
 if organNum==1 || organNum==3 || organNum ==4
     load([plyDir 'Kidney_' kidneyLetter '_Artery_Pts'],'ptOutput');
-    if mm
+    if b_mm
         points=ptOutput*1000;
     else
         points=ptOutput;
     end
 else
     load([plyDir 'Kidney_' kidneyLetter '_Sphere_Pts'],'ptOutput');
-    if mm
+    if b_mm
         points=ptOutput*1000;
     else
         points=ptOutput;
