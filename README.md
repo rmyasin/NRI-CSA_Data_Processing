@@ -4,6 +4,9 @@ This is a repository for processing the data created for the [NRI-CSA project](h
 
 There are different data processing pipelines for the various sections of the project:
 
+# Hardware setup
+See here for pics from JHU for approximate locations of everything: https://drive.google.com/open?id=1cHu61ssXBqyianDi32pspqacFKgvVQmF 
+
 # Pre-Processing for System Calibration
 
 ## Tip Calibration Procedure
