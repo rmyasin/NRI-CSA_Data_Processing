@@ -4,6 +4,9 @@ This is a repository for processing the data created for the [NRI-CSA project](h
 
 There are different data processing pipelines for the various sections of the project:
 
+# Hardware setup
+See here for pics from JHU for approximate locations of everything: https://drive.google.com/open?id=1cHu61ssXBqyianDi32pspqacFKgvVQmF 
+
 # Pre-Processing for System Calibration
 
 ## Tip Calibration Procedure
@@ -66,11 +69,19 @@ If we think it's necessary, this could be calibrated by, after performing pivot 
 The json files for the kinematics are located at:
 catkin_ws/src/cisst-saw-nri/sawIntuitiveResearchKit/share
 
+## GP Setup
+In order for the GP estimation to work properly, make sure to update
+cisst-saw-nri/nri/sawNRIModelFW/components/code/mtsGPComponent.cpp
+
+The variables vct3 minLimits and vct3 maxLimits need to be changed to match the boundaries of the organ at each site. (~line 74) 
+
 # Processing Data Collected During User Study
 1) Save data in a rosbag (preferably by using rosrun dvrk_nri_robot StudyControl.py)
 2) (optional) Change the GP parameters in GP.cpp located in nri/sawNRIModelFW/components/code
 3) (if optional) run catkin build
 4) rosbag play name_of_saved_bag
+    1) -r # will speed up the playback by # times
+    1) -s # will start # seconds into the bag
 5) rosrun csa_ros_applications gp_online -p PSM2
 5) run a visualizer (eg [Preetham's Matlab script](https://git.lcsr.jhu.edu/nri-csa/nri/blob/devel/sawNRIModelFW/matlab/ral_demo_online.m)  )
 
