@@ -77,7 +77,7 @@ def main():
   args=parser.parse_args()
   
   findBag=args.bag#eg 'Palpation_DirectForce_2018-10-02-11-27-20_0.bag'
-  folderPath=os.path.abspath(os.path.join(findBag,'..'));
+  folderPath=os.path.abspath(os.path.join(findBag,'..'))
 
 
   if args.folder:
