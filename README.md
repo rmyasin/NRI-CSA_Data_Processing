@@ -71,9 +71,9 @@ catkin_ws/src/cisst-saw-nri/sawIntuitiveResearchKit/share
 
 ## GP Setup
 In order for the GP estimation to work properly, make sure to update
-cisst-saw-nri/nri/sawNRIModelFW/components/code/mtsGPComponent.cpp
+cisst-saw-nri/nri/sawNRIModelFW/components/code/mtsGPDataCollector.cpp
 
-The variables vct3 minLimits and vct3 maxLimits need to be changed to match the boundaries of the organ at each site. (~line 74) 
+The variables vct3 minLimits and vct3 maxLimits need to be changed to match the boundaries of the organ at each site. (~line 100) 
 
 # Processing Data Collected During User Study
 1) Save data in a rosbag (preferably by using rosrun dvrk_nri_robot StudyControl.py)
