@@ -47,11 +47,11 @@ rostopic echo /dvrk/PSM2/position_cartesian_current
 ```
 
 Make sure the rotation orientation is close to when attaching
-x: 0.7071
-y: 0.7071
+x: 1.0
+y: 0.0
 z: 0.0
 w: 0.0
- You know you're in the wrong (rotated by 180) configuration if the quaternion y is negative.
+ You know you're in the wrong (rotated by 180) configuration if the quaternion y is close to 1 instead of x.
 
  The robot should look like this, but there are 2 options, so check that topic:
 
