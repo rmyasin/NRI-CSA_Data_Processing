@@ -22,12 +22,12 @@ You know you're in the wrong (rotated by 180) configuration if the quaternion y 
 
 The robot should look like this, but there are 2 options, so check that topic:
 
-<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/micron_attach_pose.jpg" alt="attachment_pose" width="200"/>
+<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/micron_attach_pose.jpg" alt="attachment_pose" width="250"/>
 
 ## Fiducial registration
  * Because we now have a base plate that attaches directly to the force sensor to lock the organ in place, you only need to register the organ one time at each site, and the appropriate registration .txt files will be created. The robot *and* the micron tracker need to be connected for this registration to work properly.
  * Follow the fiducial pattern as shown here:
-<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/Kidney_holder_user_study.png" alt="reg_pts" width="200"/>
+<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/Kidney_holder_user_study.png" alt="reg_pts" width="400"/>
 
 ```
 roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch
