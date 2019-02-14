@@ -2,80 +2,56 @@
 
 This is a repository for processing the data created for the [NRI-CSA project](http://nri-csa.vuse.vanderbilt.edu/joomla/) user study on assistive features during robot manipulation.
 
-There are different data processing pipelines for the various sections of the project:
+The [documentation folder](https://github.com/rmyasin/NRI-CSA_Data_Processing/tree/master/documentation) has information on hardware/first time setup.
 
-# Hardware setup
-See here for pics from JHU for approximate locations of everything: https://drive.google.com/open?id=1cHu61ssXBqyianDi32pspqacFKgvVQmF 
+# Running the User Study
+The main documentation for keeping the code up to date is in (the nri-csa gitlab repo)(https://git.lcsr.jhu.edu/nri-csa/cisst-saw-nri/wikis/user-study-experiment). However, we have moved the documentation for actually running the user study here.
 
-# Pre-Processing for System Calibration
 
-## Tip Calibration Procedure
-Help with probe construction/marker printing is available in the documentation folder of this repo. If you need to print the stl, the [probe design](https://github.com/vu-arma-dev/cpd-registration/tree/master/userstudy_data/UserStudy3DPrints) is also available.
+## Startup
 
-The launch file to collect micron data will need to be edited/copied for each site because of differences in the micron setup. VU needs to run the micron with UDP transfer, JHU needs to run on a separate computer, hopefully CMU can just run the saw component on the same computer. Run this, changing the foldername for your computer:
+* Source appropriate catkin workspace (needs to be using Preetham's dvrk-nri code, not base cisst-saw)
 
-```
-roslaunch dvrk_nri_robot micron.launch foldername:=/home/arma/catkin_ws/data/micron/
-```
+   ```sh
+   source ~/catkin_ws/devel/setup.bash
+   ```
+* run the robot by calling (with appropriate launch file for your site)
 
-Then perform tip calibration of each face of the probe and also show the micron frames showing adjacent faces in the same image (AB, BC, CD, DA). Now, to process the bag, run:
+   ```sh
+   roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch
+   # To select a particular organ, run the following - letters and numbers are both ok
+   roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch organ_letter:=A
+   roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch organ_letter:=22
 
-```
-rosrun nri_csa_processing main_process_experiment.py /home/arma/catkin_ws/data/micron/micron_2018-12-02-10-56-10_0.bag -o VUTipDec2TEST -f /home/arma/catkin_ws/src/processing.git/scripts/txt_output/
-```
+   # On a different terminal and source as above
+   roslaunch dvrk_vision user_study.launch
 
-The first argument is the bag you just created. The 'o' and 'f' options give the output txt filename and foldername, respectively. The default folder is the data folder of this repository.
+   # On a third terminal and source as above
+   rosrun dvrk_nri_robot StudyControl.py
+   ```
 
-To actually get the pivot calibration, in MATLAB run (with the above folder and file names)
+* Follow on-screen instructions to switch modes in the StudyControl terminal. The console will fill up with messages about rosbags (I can't figure out how to turn those off) but you can input "1" to re-display the different options to change modes
 
-```
-pivot_calibration_micron(filefolder, fileName)
-```
 
-This is also located within the script "Main_Calibrate_User_Study.m", you just need to update the folders/files correctly. A slightly different method is shown in "Main_Calibrate_JHU.m"
+# Data Processing
+## Rosbag processing
+Step one is to move from rosbags to txt files so that you can open up the data in matlab without waiting an hour to open the bag (literally I had to wait multiple minutes just to open the bags in matlab)
+  ```sh
+  cd ~/catkin_ws/data/user1
+  rosrun nri_csa_processing main_process_experiment.py Palpation_VisualForce_yyyy-mm-dd-hh-mm-ss_0.bag
+  ```
+  Do the same with all the bags in the folder (except the video bags, I don't know what we're planning on doing with them)
 
-At the end, the file tip_calibration.yaml should be created. That will be saved in the "config" folder.
+## MATLAB processing
+Now that we have .txt files...
+TODO: fill in details, make overview scripts of data results
 
-TODO: add an option in launch files for MicronTracking.py so that each site can have a unique tip_calibration.yaml file
+##Processing Continuous Palpation Data
+If you take data from the [continuous palpation](https://github.com/vu-arma-dev/continuous_palpation) repository, 
+... TODO: fill in details
 
-## Attaching to the PSM
-To attach the probe to the robot, run (in 2 terminal windows): 
 
-```
-roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch
-rostopic echo /dvrk/PSM2/position_cartesian_current
-```
-
-Make sure the rotation orientation is close to when attaching
-x: 1.0
-y: 0.0
-z: 0.0
-w: 0.0
- You know you're in the wrong (rotated by 180) configuration if the quaternion y is close to 1 instead of x.
-
- The robot should look like this, but there are 2 options, so check that topic:
-
-<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/micron_attach_pose.jpg" alt="attachment_pose" width="200"/>
-
-## Json Updates for New Probe
-We apply a constant tip offset to the end of the gripper to make the kinematics match with the tip of the actual probe. The default gripper distance is 10.2 mm, which is the distance from the center of rotation of the jaws to the tip of the large needle driver. The default is found in psm-large-needle-driver.json.json
-
-We need to edit that to create psm-large-needle-driver_micron_probe.json which has an offset to match probe_micron_v5 which has an additional offset of 11 mm to the center of the probe (for a total of 22.2 mm). 
-
-For future calculations, remember that the spherical probe itself has a radius of 3.2 mm, and that the end-effector location should be the center of the sphere.
- 
-If we think it's necessary, this could be calibrated by, after performing pivot calibration of the probe, rotating the robot's end-effector about the jaw and finding the distance from that axis of the measured tip points.
-
-The json files for the kinematics are located at:
-catkin_ws/src/cisst-saw-nri/sawIntuitiveResearchKit/share
-
-## GP Setup
-In order for the GP estimation to work properly, make sure to update
-cisst-saw-nri/nri/sawNRIModelFW/components/code/mtsGPDataCollector.cpp
-
-The variables vct3 minLimits and vct3 maxLimits need to be changed to match the boundaries of the organ at each site. (~line 100) 
-
-# Processing Data Collected During User Study
+## Processing GP Data Collected During User Study
 1) Save data in a rosbag (preferably by using rosrun dvrk_nri_robot StudyControl.py)
 2) (optional) Change the GP parameters in GP.cpp located in nri/sawNRIModelFW/components/code
 3) (if optional) run catkin build
@@ -84,8 +60,3 @@ The variables vct3 minLimits and vct3 maxLimits need to be changed to match the 
     1) -s # will start # seconds into the bag
 5) rosrun csa_ros_applications gp_online -p PSM2
 5) run a visualizer (eg [Preetham's Matlab script](https://git.lcsr.jhu.edu/nri-csa/nri/blob/devel/sawNRIModelFW/matlab/ral_demo_online.m)  )
-
-# Processing Continuous Palpation Data
-If you take data from the [continuous palpation]() repository, ... TODO
-
-
