@@ -1,11 +1,9 @@
 # First time setup
 
 ## Hardware locations
-See here for pics from JHU for approximate locations of everything: https://drive.google.com/open?id=1cHu61ssXBqyianDi32pspqacFKgvVQmF 
+See here for pics from for overall locations of everything: https://docs.google.com/presentation/d/1El2pE4V55CT5LrV1rTUpAKs5SwtxL3iR8cpxC2cSW2E/edit#slide=id.p
 
-TODO: add updated photos, combine in a presentation with distances
-TODO: upload stl of camera attachment/mount
-
+VU made a [3d printable stereo holder](https://github.com/rmyasin/NRI-CSA_Data_Processing/blob/master/data/UserStudy3DPrints/eys3dstereoholder.stl)
 
 ## Attaching to the PSM
 To attach the probe to the robot, run the equivalent codes for your site (in 2 terminal windows): 
@@ -36,9 +34,15 @@ roslaunch dvrk_nri_robot dvrk_nri_teleop_vu.launch
 rosrun dvrk_nri_robt StudyControl.py
 ```
 
-Select user '13', and then selection option '6'
+Select user '13', and then selection option '7'
 
 You can collect multiple samples at each point
+
+The end effector should be vertical for best results, like this: 
+
+<img src="https://raw.githubusercontent.com/rmyasin/NRI-CSA_Data_Processing/master/documentation/tip_registration.jpg" alt="tip_reg" width="200"/>
+
+
 
 ## GP Setup
 In order for the GP estimation to work properly, make sure to update
