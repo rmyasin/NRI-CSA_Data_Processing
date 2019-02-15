@@ -1,4 +1,4 @@
-function [cur,des,micron,joint,vProtocol,micronTip]=readRobTxt(folder,filename,baseLabel)
+function [cur,des,force,joint,vProtocol,micronTip]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
