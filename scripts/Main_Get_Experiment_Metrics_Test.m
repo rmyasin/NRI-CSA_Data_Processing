@@ -5,12 +5,14 @@ clc
 % restoredefaultpath
 % addpath(genpath(getenv('ARMA_CL')))
 
-dataFolder='R:\Projects\NRI\User_Study\Data\user1_test_2019-02-13';
-% organLetters={'A',10,10}; % THIS NEEDS AN ADJUSTMENT FOR RERUNNING MORE ORGANS
+% dataFolder='R:\Projects\NRI\User_Study\Data\user1_test_2019-02-13';
+dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
 cpd_dir=getenv('CPDREG');
 featureFolder= 'R:\Robots\CPD_Reg.git\userstudy_data\PLY';
 organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 
+[~,dataFolderName]=fileparts(dataFolder);
+resultsStruct.userNumber=str2double(dataFolderName(5));
 contents=dir(dataFolder);
 regTimes=[];
 regNames={};
@@ -20,36 +22,66 @@ for ii=1:length(contents)
         regNames{end+1}=contents(ii).name;
         regTimes(end+1)=str2num(contents(ii).name(14:end));
     elseif startsWith(key,'Following_Visual') && endsWith(key,'.txt')
+        start = length('Following_Visual')+2;
+        a=strfind(key(start:end),'_');
+        finish = start+a(1)-2;
+        expOrgan{1}= key(start:finish);
         expName{1}=contents(ii).name;
     elseif startsWith(key,'Following_DirectForce') && endsWith(key,'.txt')
+        start = length('Following_DirectForce')+2;
+        a=strfind(key(start:end),'_');
+        finish = start+a(1)-2;
+        expOrgan{2}= key(start:finish);
+        
         expName{2}=contents(ii).name;
     elseif startsWith(key,'Following_HybridForce') && endsWith(key,'.txt')
+        start = length('Following_HybridForce')+2;
+        a=strfind(key(start:end),'_');
+        finish = start+a(1)-2;
+        expOrgan{3}= key(start:finish);
+        
         expName{3}=contents(ii).name;
     elseif startsWith(key,'Palpation_DirectForce') && endsWith(key,'.txt')
+        start = length('Palpation_DirectForce')+2;
+        a=strfind(key(start:end),'_');
+        finish = start+a(1)-2;
+        expOrgan{4}= key(start:finish);
+        
         expName{4}=contents(ii).name;
     elseif startsWith(key,'Palpation_VisualForce') && endsWith(key,'.txt')
+        start = length('Palpation_VisualForce')+2;
+        a=strfind(key(start:end),'_');
+        finish = start+a(1)-2;
+        expOrgan{5}= key(start:finish);
+        
         expName{5}=contents(ii).name;
     end
 end
 
 % Read in organ A, get ground truth location of organ/artery
-organLabel='A'; %organ A
 for ii=1:3
-    figure
-    [cur,des,force,joint,vProtocol,micronTip]=readRobTxt(datafolder,expName{ii});
+    organLabel=expOrgan{ii};
+    
+    [output,vProtocol]=readRobTxt(dataFolder,expName{ii});
+    cur=output.psm_cur;
+    des=output.psm_des;
+    force=output.force;
+    micronTip=output.micronTip;
     registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
     regFolder=regNames{registrationIndex};
-    arteryInRobot = getArteryPoints([datafolder filesep regFolder],organLabel,featureFolder);
+    arteryInRobot = getArteryPoints([dataFolder filesep regFolder],organLabel,featureFolder);
     
+    figure
     vplot3(cur.pos/1000)
     hold on
     vplot3(arteryInRobot)
     
-%     % NEED NEW MICRON TRANSFORM CALCULATION - SOMETHING IS WRONG
-%     registrationFilePath = [datafolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
+    % Something is wrong in micron data
+%     registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
 %     HMicron=readTxtReg(registrationFilePath);
-%     micronHomog=HMicron*[micronTip.pos';ones(1,length(micronTip.pos))];
+%     micronHomog=HMicron\[micronTip.pos';ones(1,length(micronTip.pos))];
 %     vplot3(micronHomog(1:3,:));
+%     vplot3(micronTip.pos);
     
     %Add time processing for when each is started/finished
 %     USE SIGNALS FROM FOOTPEDAL! MAKE SURE TO RECORD/EXTRACT THOSE!
@@ -80,37 +112,37 @@ for ii=1:3
 % important to think about upfront
 
     % Add the organ itself
-    organInRobot = getOrganPoints([datafolder filesep regFolder],organLabel,organFolder);
+    organInRobot = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
     vplot3(organInRobot)
 
     figure
-    plot(force.data)
+    forceNorm=sqrt(sum(force.data.^2,2));
+    plot(forceNorm)
 end
 
 %%
-% Read in organ 10, get ground truth location of organ/spheres
-% organLabel='10';
-organLabel='B';
+% Read in organ, get ground truth location of organ/spheres
 for ii=4:5
+    organLabel=expOrgan{ii};
     figure
-    [cur,des,force,joint,vProtocol,micronTip]=readRobTxt(datafolder,expName{ii});
+    output=readRobTxt(dataFolder,expName{ii});
+    
+    cur=output.psm_cur;
+    micronTip=output.micronTip;
+    
     registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
     regFolder=regNames{registrationIndex};
 
-    spheresInRobot = getSpherePoints([datafolder filesep regFolder],organLabel,featureFolder);
-    
+    spheresInRobot = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
+
     %TODO: get locations saved by user! write that to a topic so that you
     %don't have to post-process anything
-    
-    organInRobot = getOrganPoints([datafolder filesep regFolder],organLabel,organFolder);
+    organInRobot = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
     vplot3(organInRobot)
     hold on
     vplot3(spheresInRobot,'o')
     vplot3(cur.pos/1000)
-
-    
 end
-
 
 %% Trim between time example
 % % Find lock orientation topic for turning on/off curve following

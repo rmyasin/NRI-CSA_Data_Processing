@@ -1,8 +1,8 @@
-function [cur,des,force,joint,vProtocol,micronTip]=readRobTxt(folder,filename,baseLabel)
+function [output,vProtocol]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
-titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip'};
+titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','poi_clear','poi_points'};
 
 
 robfile=fopen([folder filesep filename]);
@@ -34,6 +34,12 @@ micronTip.time=[];
 micronTip.pos=[];
 micronTip.quat=[];
 micronTip.seq=[];
+
+poiPoints.time=[];
+poiPoints.data=[];
+
+poiClear.time=[];
+poiClear.data=[];
 
 while line~=-1
     temp=find(strcmp(line,titleList));
@@ -73,6 +79,12 @@ while line~=-1
                 micronTip.pos=[micronTip.pos;numLine(2:4)];
                 micronTip.quat=[micronTip.quat;numLine(5:8)];
                 micronTip.seq=[micronTip.seq;numLine(9)];
+            case 9 
+                poiClear.time=[poiClear.time;numLine(1)];
+                poiClear.data=[poiClear.time;numLine(2:end)];
+            case 10
+                poiPoints.time=[poiPoints.time;numLine(1)];
+                poiPoints.data=[poiPoints.time;numLine(2:end)];
         end
     end
     line=fgetl(robfile);
@@ -136,4 +148,8 @@ else
 end
 %%
 fclose(robfile);
+
+dataList={cur,des,microndat,joint,cameraTime,mtm,force,micronTip,poiClear,poiPoints};
+output=cell2struct(dataList,titleList,2);
+
 end
