@@ -23,7 +23,7 @@ import re
 import rosbag
 import numpy as np
 import argparse
-
+import copy
 import ipdb
 
 def locateInList(inlist,element):
@@ -93,20 +93,29 @@ def main():
   bagList=getMatchingRosBags(folderPath,findBag)
 
   # Set up lists of data to save and corresponding topics
-  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
-  timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'psm_des':[],'micronTip':[],'micron':[],'psm_joint':[]}
+  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[]}
+  # timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[]}
+  timeLists = copy.deepcopy(dataLists)
   topicNames= { 'force':  '/dvrk/PSM2/wrench',
           'psm_cur':  '/dvrk/PSM2/position_cartesian_current',
           'mtm_cur':  '/dvrk/MTMR/position_cartesian_current',
           'camera' :  '/dvrk/footpedals/camera',
+          'cam_minus' :  '/dvrk/footpedals/cam_minus',
+          'cam_plus' :  '/dvrk/footpedals/cam_plus',
+          'clutch' :  '/dvrk/footpedals/clutch',
+          'coag' :  '/dvrk/footpedals/coag',
           'psm_des':  '/dvrk/PSM2/position_cartesian_desired',
           'micronTip' : '/MicronTipPose',
+          'micronValid':['/micron/PROBE_A/measured_cp_valid','/micron/PROBE_B/measured_cp_valid','/micron/PROBE_C/measured_cp_valid','/micron/PROBE_D/measured_cp_valid'],
           'psm_joint':'/dvrk/PSM2/state_joint_current',
-          'A' :   ['/A','/micron/PROBE_A',],
-          'B' :   ['/B','/micron/PROBE_B',],
-          'C' :   ['/C','/micron/PROBE_C',],
-          'D' :   ['/D','/micron/PROBE_D',],
+          'A' :   ['/A','/micron/PROBE_A/measured_cp',],
+          'B' :   ['/B','/micron/PROBE_B/measured_cp',],
+          'C' :   ['/C','/micron/PROBE_C/measured_cp',],
+          'D' :   ['/D','/micron/PROBE_D/measured_cp',],
           'Ref' :   ['/Ref','/micron/Ref',],
+
+          'poi_points': '/dvrk_vision/user_POI',
+          'poi_clear': '/dvrk_vision/clear_POI',
         }
   
   topicList=list()
@@ -133,6 +142,18 @@ def main():
       elif topic == topicNames['camera']:
         dataLists['camera'].append(msg.buttons)
         timeLists['camera'].append(t)
+      elif topic == topicNames['cam_minus']:
+        dataLists['cam_minus'].append(msg.buttons)
+        timeLists['cam_minus'].append(t)
+      elif topic == topicNames['cam_plus']:
+        dataLists['cam_plus'].append(msg.buttons)
+        timeLists['cam_plus'].append(t)
+      elif topic == topicNames['clutch']:
+        dataLists['clutch'].append(msg.buttons)
+        timeLists['clutch'].append(t)
+      elif topic == topicNames['coag']:
+        dataLists['coag'].append(msg.buttons)
+        timeLists['coag'].append(t)
       elif topic == topicNames['psm_des']:
         dataLists['psm_des'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z])
         timeLists['psm_des'].append(t)
@@ -140,12 +161,20 @@ def main():
         dataLists['micronTip'].append([msg.pose.position.x,msg.pose.position.y,msg.pose.position.z,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.header.seq])
         timeLists['micronTip'].append(t)
       elif topic in topicNames['A'] or topic in topicNames['B'] or topic in topicNames['C'] or topic in topicNames['D'] or topic in topicNames['Ref']:
-        # ipdb.set_trace()
         dataLists['micron'].append([msg.pose.position.x,msg.pose.position.y,msg.pose.position.z,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.header.frame_id,msg.header.seq])
         timeLists['micron'].append(t)
+      elif topic in topicNames['micronValid']:
+        dataLists['micronValid'].append([topic, msg.data])
+        timeLists['micronValid'].append(t.to_nsec())
       elif topic == topicNames['psm_joint']:
         dataLists['psm_joint'].append(list(msg.position))
         timeLists['psm_joint'].append(t)
+      elif topic== topicNames['poi_points']:
+        dataLists['poi_points'].append([msg.x,msg.y,msg.z])
+        timeLists['poi_points'].append(t)
+      elif topic== topicNames['poi_clear']:
+        dataLists['poi_clear'].append([1])
+        timeLists['poi_clear'].append(t)
 
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')

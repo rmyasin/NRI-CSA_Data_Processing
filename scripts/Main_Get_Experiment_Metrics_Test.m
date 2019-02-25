@@ -6,9 +6,14 @@ clc
 % addpath(genpath(getenv('ARMA_CL')))
 
 % dataFolder='R:\Projects\NRI\User_Study\Data\user1_test_2019-02-13';
-dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
-cpd_dir=getenv('CPDREG');
-featureFolder= 'R:\Robots\CPD_Reg.git\userstudy_data\PLY';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
+dataFolder='/home/arma/catkin_ws/data/user5';
+% cpd_dir=getenv('CPDREG');
+cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
+% featureFolder= 'R:\Robots\CPD_Reg.git\userstudy_data\PLY';
+featureFolder ='/home/arma/catkin_ws/src/cpd-registration/userstudy_data/PLY';
 organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 
 [~,dataFolderName]=fileparts(dataFolder);
@@ -59,7 +64,7 @@ for ii=1:length(contents)
 end
 
 % Read in organ A, get ground truth location of organ/artery
-for ii=1:3
+for ii=2:3
     organLabel=expOrgan{ii};
     
     [output,vProtocol]=readRobTxt(dataFolder,expName{ii});
@@ -69,19 +74,18 @@ for ii=1:3
     micronTip=output.micronTip;
     registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
     regFolder=regNames{registrationIndex};
-    arteryInRobot = getArteryPoints([dataFolder filesep regFolder],organLabel,featureFolder);
+    [arteryInRobot,HOrgan] = getArteryPoints([dataFolder filesep regFolder],organLabel,featureFolder);
     
     figure
     vplot3(cur.pos/1000)
     hold on
     vplot3(arteryInRobot)
     
-    % Something is wrong in micron data
-%     registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
-%     HMicron=readTxtReg(registrationFilePath);
-%     micronHomog=HMicron\[micronTip.pos';ones(1,length(micronTip.pos))];
-%     vplot3(micronHomog(1:3,:));
-%     vplot3(micronTip.pos);
+    % Micron data is reported in organ frame, which is weird, but ok
+    registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
+    HMicron=readTxtReg(registrationFilePath);
+    micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
+    vplot3(micronHomog(1:3,:)');
     
     %Add time processing for when each is started/finished
 %     USE SIGNALS FROM FOOTPEDAL! MAKE SURE TO RECORD/EXTRACT THOSE!
