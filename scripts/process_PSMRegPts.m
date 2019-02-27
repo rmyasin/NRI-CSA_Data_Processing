@@ -4,8 +4,8 @@ close all
 addpath(genpath(getenv('ECLDIR'))) % get quatlib
 
 addpath(genpath('Utilities'))
-fidFolder='/home/mshahba3/Documents/cpd-registration/userstudy_data/FiducialLocations';
-% fidFolder='/home/arma/catkin_ws/src/cpd-registration/userstudy_data/FiducialLocations';
+% fidFolder='/home/mshahba3/Documents/cpd-registration/userstudy_data/FiducialLocations';
+fidFolder='/home/arma/catkin_ws/src/cpd-registration/userstudy_data/FiducialLocations';
 addpath(fidFolder)
 for ii=1:6
     load(['FiducialLocations_' num2str(ii)]);
@@ -15,7 +15,7 @@ end
 % % filenames={'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPts.txt'
 % %            'R:\Projects\NRI\User_Study\Data\data\JHU_Registration\PSMRegPtsJHU.txt';};
 filenames={'/home/mshahba3/catkin_ws/src/cisst-saw-nri/nri-ros/dvrk_nri_robot/data/user_study/PSMRegPts.txt'}
-
+filenames={'/home/arma/catkin_ws/src/cisst-saw-nri/nri-ros/dvrk_nri_robot/data/user_study/PSMRegPts.txt'}
 %            '/home/arma/catkin_ws/src/processing.git/data/PSMRegPtsJHU.txt'}
 p_VU_python = [-0.10604732 -0.18797096 -0.10305663]';
 q_VU_python = [-0.39879553163917775 0.002071089312541772 0.9169612234797171 0.011830011338348219];
@@ -64,6 +64,8 @@ for ii=1:length(filenames)
     micronPoints=micronPoints./count';
     
     [R,t]=rigidPointRegistration(robPoints,fiducials{1});
+    [Rm,tm]=rigidPointRegistration(micronPoints,robPoints);
+
     
     errorMat{ii}=R*robPoints+t-fiducials{1};
     

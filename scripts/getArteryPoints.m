@@ -1,4 +1,4 @@
-function arteryInRobot = getArteryPoints(regFolder,organLabel,organFolder)
+function [arteryInRobot,HOrgan] = getArteryPoints(regFolder,organLabel,organFolder)
 temp=load([organFolder filesep 'Kidney_' organLabel '_Artery_Pts.mat']);
 arteryPointsRaw=temp.ptOutput;
 clear('temp');
