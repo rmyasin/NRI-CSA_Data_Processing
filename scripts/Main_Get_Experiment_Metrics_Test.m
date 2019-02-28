@@ -4,6 +4,7 @@ close all
 
 % restoredefaultpath
 % addpath(genpath(getenv('ARMA_CL')))
+% addpath(genpath('Utilities'))
 
 % dataFolder='R:\Projects\NRI\User_Study\Data\user1_test_2019-02-13';
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
@@ -13,8 +14,11 @@ close all
 
 cpd_dir=getenv('CPDREG');
 % cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
-dataFolder='R:\Projects\NRI\User_Study\Data\user4';
+dataFolder='R:\Projects\NRI\User_Study\Data\user5';
 % dataFolder='/home/arma/catkin_ws/data/user5';
+dataFolder='R:\Projects\NRI\User_Study\Data\user6';
+dataFolder='R:\Projects\NRI\User_Study\Data\user7';
+
 
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
 organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
@@ -65,10 +69,13 @@ for ii=1:length(contents)
         expName{5}=contents(ii).name;
     end
 end
+% TODO: this needs an option for repeated experiments with different organs,
+% since palpation experiments will be repeated at least 1x per organ
+
 
 %%
 % Read in organ A, get ground truth location of organ/artery
-for ii=2:3
+for ii=[]%2:3
     organLabel=expOrgan{ii};
     
     [output,vProtocol]=readRobTxt(dataFolder,expName{ii});
@@ -77,7 +84,7 @@ for ii=2:3
     force=output.force;
     forceTime = force.time;
     
-%     Find when the robot is in contact
+    % Find when the robot is in contact
     forceNorms=sqrt(sum(output.force.data.^2,2));
     contactIndex=forceNorms>0.1;
     contactChangeTimes=[];
@@ -96,29 +103,13 @@ for ii=2:3
     if ~contactChangeTimes(end)
         curLeaveIndex(end)=1;
     end
+    
+    % Plot the in contact and free space data
     vplot3(cur.pos(curLeaveIndex,:))
     hold on
     vplot3(cur.pos(~curLeaveIndex,:))
     
-%     diff(contactTimes)
-%     find((diff(contactIndex)~=0))
-%     contactTimes=output.force.time(contactIndex);
-% 
-% %     DONT CHECK DISCRETE POINTS, GET RANGES OF TIMES WHEN IN/OUT OF
-% %     CONTACT
-% contactThresh=0.1;
-% startContact=forceNorms(1)>contactThresh;
-% changedTimes = contactTimes(diff(contactTimes/1E9)>0.05);
-% 
-%     t1 = contactTimes;
-%     t2 = output.psm_cur.time;
-%     [val, idxB] = min( abs(t1(:)-t2(:)') ,[],2);
-%     val/1E9<0.01
-%     closeTimes=t2(idxB);
-%     savedPoints=output.psm_cur.pos(idxB,:)/1000;
-
-%     contactPositions = 
-
+    % Plot the raw robot data
     micronTip=output.micronTip;
     registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
     regFolder=regNames{registrationIndex};
@@ -165,7 +156,7 @@ for ii=2:3
 
     % Add the organ itself
     organInRobot = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
-    vplot3(organInRobot)
+    vplot3(organInRobot')
 
     figure
     forceNorm=sqrt(sum(force.data.^2,2));
@@ -174,7 +165,7 @@ end
 
 %%
 % Read in organ, get ground truth location of organ/spheres
-for ii=4:5
+for ii=5%4:5
     organLabel=expOrgan{ii};
     figure
     % Read data file
@@ -199,12 +190,15 @@ for ii=4:5
     [organInRobot,H2,organRaw] = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
     
     % Plot results
-    vplot3(organInRobot)
+    vplot3(organInRobot')
     hold on
-    vplot3(spheresInRobot,'o')
+    vplot3(spheresInRobot','o')
     vplot3(savedPoints,'x')
-    vplot3(output.micronTip.pos);
     
+    registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
+    HMicron=readTxtReg(registrationFilePath);
+    micronHomog=H2*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
+    vplot3(micronHomog(1:3,:)');    
     
 %     TODO: need to convert robot selected points to closest on
 %     organ and then distance to the sphere center (which I think we've

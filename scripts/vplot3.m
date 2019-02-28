@@ -1,9 +1,11 @@
-function vplot3(data,legend)
-
-if nargin>1
-    plot3(data(:,1),data(:,2),data(:,3),legend)
-else
-    plot3(data(:,1),data(:,2),data(:,3))
+function vplot3(inputMat,colorstring)
+if size(inputMat,2)~=3
+    error('Must input an NX3 matrix');
 end
 
+if nargin<2
+    colorstring='';
+end
+
+plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3),colorstring)
 end

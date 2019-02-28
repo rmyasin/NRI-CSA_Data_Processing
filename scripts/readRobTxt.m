@@ -107,7 +107,7 @@ while line~=-1
                 poiClear.data=[poiClear.time;numLine(2:end)];
             case 11 %poi_points
                 poiPoints.time=[poiPoints.time;numLine(1)];
-                poiPoints.data=[poiPoints.time;numLine(2:end)];
+                poiPoints.data=[poiPoints.data;numLine(2:end)];
             case 12 % cam_minus
                 buttons.camminus.time=[buttons.camminus.time;numLine(1)];
                 buttons.camminus.push = [buttons.camminus.push;numLine(2:end)];
