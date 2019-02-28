@@ -1,6 +1,6 @@
 clear
 close all
-clc
+% clc
 
 % restoredefaultpath
 % addpath(genpath(getenv('ARMA_CL')))
@@ -9,11 +9,14 @@ clc
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
-dataFolder='/home/arma/catkin_ws/data/user5';
-% cpd_dir=getenv('CPDREG');
-cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
-% featureFolder= 'R:\Robots\CPD_Reg.git\userstudy_data\PLY';
-featureFolder ='/home/arma/catkin_ws/src/cpd-registration/userstudy_data/PLY';
+
+
+cpd_dir=getenv('CPDREG');
+% cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
+dataFolder='R:\Projects\NRI\User_Study\Data\user4';
+% dataFolder='/home/arma/catkin_ws/data/user5';
+
+featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
 organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 
 [~,dataFolderName]=fileparts(dataFolder);
@@ -63,6 +66,7 @@ for ii=1:length(contents)
     end
 end
 
+%%
 % Read in organ A, get ground truth location of organ/artery
 for ii=2:3
     organLabel=expOrgan{ii};
@@ -71,6 +75,50 @@ for ii=2:3
     cur=output.psm_cur;
     des=output.psm_des;
     force=output.force;
+    forceTime = force.time;
+    
+%     Find when the robot is in contact
+    forceNorms=sqrt(sum(output.force.data.^2,2));
+    contactIndex=forceNorms>0.1;
+    contactChangeTimes=[];
+    if contactIndex(1)
+        contactChangeTimes=[contactChangeTimes;forceTime(1)];
+    end
+    contactChangeTimes=[contactChangeTimes;forceTime(find(diff(contactIndex)~=0))];
+    if contactIndex(end)
+        contactChangeTimes=[contactChangeTimes;forceTime(end)];
+    end
+    
+    curLeaveIndex=zeros(size(cur.time));
+    for jj=2:2:(length(contactChangeTimes)-1)
+        curLeaveIndex=curLeaveIndex | (cur.time>contactChangeTimes(jj) & cur.time<contactChangeTimes(jj+1));
+    end
+    if ~contactChangeTimes(end)
+        curLeaveIndex(end)=1;
+    end
+    vplot3(cur.pos(curLeaveIndex,:))
+    hold on
+    vplot3(cur.pos(~curLeaveIndex,:))
+    
+%     diff(contactTimes)
+%     find((diff(contactIndex)~=0))
+%     contactTimes=output.force.time(contactIndex);
+% 
+% %     DONT CHECK DISCRETE POINTS, GET RANGES OF TIMES WHEN IN/OUT OF
+% %     CONTACT
+% contactThresh=0.1;
+% startContact=forceNorms(1)>contactThresh;
+% changedTimes = contactTimes(diff(contactTimes/1E9)>0.05);
+% 
+%     t1 = contactTimes;
+%     t2 = output.psm_cur.time;
+%     [val, idxB] = min( abs(t1(:)-t2(:)') ,[],2);
+%     val/1E9<0.01
+%     closeTimes=t2(idxB);
+%     savedPoints=output.psm_cur.pos(idxB,:)/1000;
+
+%     contactPositions = 
+
     micronTip=output.micronTip;
     registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
     regFolder=regNames{registrationIndex};
@@ -87,7 +135,7 @@ for ii=2:3
     micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
     vplot3(micronHomog(1:3,:)');
     
-    %Add time processing for when each is started/finished
+    % Add time processing for when each is started/finished
 %     USE SIGNALS FROM FOOTPEDAL! MAKE SURE TO RECORD/EXTRACT THOSE!
     
     %QUESTION: when evaluating distance from line, do we project onto the
@@ -129,32 +177,47 @@ end
 for ii=4:5
     organLabel=expOrgan{ii};
     figure
+    % Read data file
     output=readRobTxt(dataFolder,expName{ii});
-    
     cur=output.psm_cur;
     micronTip=output.micronTip;
     
-    registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); %find the most recent registration
+    % Find the most recent registration
+    registrationIndex=find((cur.time(1)-regTimes)>0,1,'last'); 
     regFolder=regNames{registrationIndex};
 
-    spheresInRobot = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
-
-    %TODO: get locations saved by user! write that to a topic so that you
-    %don't have to post-process anything
-    organInRobot = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
+	% Get Sphere Points
+    [spheresInRobot,H1,sphereRaw] = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
+    
+    % Get times closest to selected POI times
+    t1 = output.poi_points.time;
+    t2 = output.psm_cur.time;
+    [~, idxB] = min( abs(t1(:)-t2(:)') ,[],2);
+    savedPoints=output.psm_cur.pos(idxB,:)/1000;
+    
+    % Get Organ Points
+    [organInRobot,H2,organRaw] = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
+    
+    % Plot results
     vplot3(organInRobot)
     hold on
     vplot3(spheresInRobot,'o')
-    vplot3(cur.pos/1000)
-end
+    vplot3(savedPoints,'x')
+    vplot3(output.micronTip.pos);
+    
+    
+%     TODO: need to convert robot selected points to closest on
+%     organ and then distance to the sphere center (which I think we've
+%     maybe already converted to closest mesh points)
+    
+% Metric question: How to represent error in selection?
+%     average distace from selected spot to hard nodule?
+%     average distance from hard nodule to closest selection?
 
-%% Trim between time example
-% % Find lock orientation topic for turning on/off curve following
-% output.lock_time=lock_time(find(lock_time,1):end); % Start with a locking event
-% 
-% if length(lock_time)
-%     % Trim psm data to be only between camera button presses
-%     output.psm_locked=trimBetweenTime([output.psm_cur.x',output.psm_cur.y',output.psm_cur.z'],output.psm_cur.time,lock_time);
-%     output.ft_locked=trimBetweenTime([output.ft.fx',output.ft.fy',output.ft.fz'],ft.time,lock_time);
-%     output.fmtm_vf_curve=trimBetweenTime([fmtm_vf.fx',fmtm_vf.fy',fmtm_vf.fz'],fmtm_vf.time,lock_time);
-% end
+% Metric question: how do we count that a nodule has been found?
+%     Define some arbitrary epsilon that indicates a nodule has been
+%     "located"
+    
+    % Total Experiment time in seconds (convert from nanoseconds)
+    experimentLengthInS = (output.psm_cur.time(end)-output.psm_cur.time(1))/1E9;
+end
