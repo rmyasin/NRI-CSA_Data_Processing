@@ -93,8 +93,7 @@ def main():
   bagList=getMatchingRosBags(folderPath,findBag)
 
   # Set up lists of data to save and corresponding topics
-  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[]}
-  # timeLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[]}
+  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[]}
   timeLists = copy.deepcopy(dataLists)
   topicNames= { 'force':  '/dvrk/PSM2/wrench',
           'psm_cur':  '/dvrk/PSM2/position_cartesian_current',
@@ -113,9 +112,10 @@ def main():
           'C' :   ['/C','/micron/PROBE_C/measured_cp',],
           'D' :   ['/D','/micron/PROBE_D/measured_cp',],
           'Ref' :   ['/Ref','/micron/Ref',],
-
           'poi_points': '/dvrk_vision/user_POI',
           'poi_clear': '/dvrk_vision/clear_POI',
+          'display_points': '/control/Vision_Point_List',
+          'artery_status': '/control/arteryStatus',
         }
   
   topicList=list()
@@ -175,6 +175,18 @@ def main():
       elif topic== topicNames['poi_clear']:
         dataLists['poi_clear'].append([1])
         timeLists['poi_clear'].append(t)
+      elif topic== topicNames['display_points']:
+        # ipdb.set_trace()
+        tempList=list()
+        for pose in msg.poses:
+          tempList.append(pose.position.x)
+          tempList.append(pose.position.y)
+          tempList.append(pose.position.z)
+        dataLists['display_points'].append(tempList)
+        timeLists['display_points'].append(t)
+      elif topic==topicNames['artery_status']:
+        dataLists['artery_status'].append([msg.data])
+        timeLists['artery_status'].append(t)
 
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')
