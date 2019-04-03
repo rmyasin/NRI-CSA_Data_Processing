@@ -10,14 +10,15 @@ close all
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
 % dataFolder='R:\Projects\NRI\User_Study\Data\user3_20190220_test';
+dataFolder='/home/arma/catkin_ws/data/user11';
 
 
-cpd_dir=getenv('CPDREG');
-% cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
-dataFolder='R:\Projects\NRI\User_Study\Data\user5';
+% cpd_dir=getenv('CPDREG');
+cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user5';
 % dataFolder='/home/arma/catkin_ws/data/user5';
-dataFolder='R:\Projects\NRI\User_Study\Data\user6';
-dataFolder='R:\Projects\NRI\User_Study\Data\user7';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user6';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user7';
 
 
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];

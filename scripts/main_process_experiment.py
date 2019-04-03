@@ -93,7 +93,7 @@ def main():
   bagList=getMatchingRosBags(folderPath,findBag)
 
   # Set up lists of data to save and corresponding topics
-  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[]}
+  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'text':[]}
   timeLists = copy.deepcopy(dataLists)
   topicNames= { 'force':  '/dvrk/PSM2/wrench',
           'psm_cur':  '/dvrk/PSM2/position_cartesian_current',
@@ -116,6 +116,7 @@ def main():
           'poi_clear': '/dvrk_vision/clear_POI',
           'display_points': '/control/Vision_Point_List',
           'artery_status': '/control/arteryStatus',
+          'text':'/control/textDisplay',
         }
   
   topicList=list()
@@ -187,14 +188,20 @@ def main():
       elif topic==topicNames['artery_status']:
         dataLists['artery_status'].append([msg.data])
         timeLists['artery_status'].append(t)
+      elif topic==topicNames['text']:
+        dataLists['text'].append(msg.data.__repr__())
+        timeLists['text'].append(t)
 
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')
-  f.write('Version 2\n')
+  f.write('Version 3\n')
   for topicName in dataLists.keys():
     f.write(topicName+'\n')
     for i in range(len(dataLists[topicName])):
-      f.write(str(timeLists[topicName][i])+" "+" ".join(str(x) for x in dataLists[topicName][i]) +"\n")
+      if type(dataLists[topicName][i])==str:
+        f.write(str(timeLists[topicName][i])+" "+dataLists[topicName][i] +"\n")
+      else:
+        f.write(str(timeLists[topicName][i])+" "+" ".join(str(x) for x in dataLists[topicName][i]) +"\n")
   f.close()
 
 if __name__ == '__main__':
