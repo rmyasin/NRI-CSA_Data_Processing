@@ -2,7 +2,7 @@ function [output,vProtocol]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
-titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag'};
+titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text'};
 
 
 robfile=fopen([folder filesep filename]);
@@ -24,11 +24,20 @@ des.pos=[];
 microndat=[];
 joint.time=[];
 joint.q=[];
-cameraTime=[];
 mtm.time=[];
 mtm.pos=[];
 force.time=[];
 force.data=[];
+
+display_points.time=[];
+display_points.data={};
+
+artery_status.time=[];
+artery_status.data=[];
+
+text.time=[];
+text.data={};
+
 
 micronTip.time=[];
 micronTip.pos=[];
@@ -120,6 +129,17 @@ while line~=-1
             case 15 % coag
                 buttons.coag.time=[buttons.coag.time;numLine(1)];
                 buttons.coag.push = [buttons.coag.push;numLine(2:end)];
+            case 16 %display_points
+                display_points.time=[display_points.time;numLine(1)];
+                display_points.data={display_points.data;reshape(numLine(2:end),3,[])};
+            case 17 %artery_status
+                artery_status.time=[artery_status.time;numLine(1)];
+                artery_status.data=[artery_status.data;numLine(2:end)];
+            case 18 %text
+                timeIndex=strfind(line,' ');
+                text.time=[text.time;str2num(line(2:timeIndex-1))];
+                text.data={text.data;line(timeIndex(1)+2:end-1)};
+
         end
     end
     line=fgetl(robfile);

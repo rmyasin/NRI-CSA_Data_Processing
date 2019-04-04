@@ -1,15 +1,16 @@
 clear
 close all
-clc
+% clc
 
 % restoredefaultpath
 % addpath(genpath(getenv('ARMA_CL')))
 % addpath(genpath('Utilities'))
 
-dataFolder='/home/arma/catkin_ws/data/user11';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user11';
 
 
-dataFolder='R:\Projects\NRI\User_Study\Data\user11';
+dataFolder='R:\Projects\NRI\User_Study\Data\user1';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user2';
 
 plotOption=true;
 % cpd_dir=getenv('CPDREG');
@@ -46,7 +47,6 @@ for ii=1:length(contents)
         finish = start+a(1)-2;
         expOrgan{2}= key(start:finish);
         expName{2}=contents(ii).name;
-        
     elseif startsWith(key,'Following_DirectForce') && endsWith(key,'.txt')
         start = length('Following_DirectForce')+2;
         a=strfind(key(start:end),'_');
@@ -81,7 +81,7 @@ end
 % since palpation experiments will be done 2x, one per each organ
 
 %% Process artery-following experiment
-for ii=[]%1:4
+for ii=1%:4
     organLabel=expOrgan{ii};
     
     %% Read the robot data from txt file
@@ -199,6 +199,7 @@ for ii=[]%1:4
         plot(forceNorm)
     end
 end
+
 
 %%
 % Read in organ, get ground truth location of organ/spheres
