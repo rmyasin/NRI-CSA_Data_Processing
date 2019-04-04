@@ -6,15 +6,14 @@ clc
 % addpath(genpath(getenv('ARMA_CL')))
 % addpath(genpath('Utilities'))
 
-% TODO:
-% Update footpedals to take into account when the user adds/removes points
-% Add data saving struct to remember raw results and experiment metrics
-% Make a list of data Folders to be able to save and load data from subsets
-% of users
+dataFolder='/home/arma/catkin_ws/data/user11';
+
 
 dataFolder='R:\Projects\NRI\User_Study\Data\user11';
 
 plotOption=true;
+% cpd_dir=getenv('CPDREG');
+cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
 
 cpd_dir=getenv('CPDREG');
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
