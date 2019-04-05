@@ -1,27 +1,22 @@
 clear
 close all
-% clc
+clc
 
-% restoredefaultpath
-% addpath(genpath(getenv('ARMA_CL')))
-% addpath(genpath('Utilities'))
+restoredefaultpath
+addpath(genpath(getenv('ARMA_CL')))
+addpath(genpath('Utilities'))
 
-% dataFolder='R:\Projects\NRI\User_Study\Data\user11';
-
-
-dataFolder='R:\Projects\NRI\User_Study\Data\user1';
-% dataFolder='R:\Projects\NRI\User_Study\Data\user2';
-
+dataFolder='R:\Projects\NRI\User_Study\Data\user22';
+% dataFolder='R:\Projects\NRI\User_Study\Data\user12';
 plotOption=true;
-% cpd_dir=getenv('CPDREG');
-cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
+% cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
 
 cpd_dir=getenv('CPDREG');
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
 organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep 'RegAprToCT'];
 
 [~,dataFolderName]=fileparts(dataFolder);
-resultsStruct.userNumber=str2double(dataFolderName(5));
+resultsStruct.userNumber=str2double(dataFolderName(5:end));
 contents=dir(dataFolder);
 regTimes=[];
 regNames={};
@@ -53,7 +48,6 @@ for ii=1:length(contents)
         finish = start+a(1)-2;
         expOrgan{3}= key(start:finish);
         expName{3}=contents(ii).name;
-        
     elseif startsWith(key,'Following_HybridForce') && endsWith(key,'.txt')
         start = length('Following_HybridForce')+2;
         a=strfind(key(start:end),'_');
@@ -66,26 +60,32 @@ for ii=1:length(contents)
         finish = start+a(1)-2;
         expOrgan{5}= {expOrgan{5}{:},key(start:finish)};
         expName{5}={expName{5}{:},contents(ii).name};
-        
     elseif startsWith(key,'Palpation_VisualForce') && endsWith(key,'.txt')
         start = length('Palpation_VisualForce')+2;
         a=strfind(key(start:end),'_');
         finish = start+a(1)-2;
         expOrgan{6}= {expOrgan{6}{:},key(start:finish)};
         expName{6}={expName{6}{:},contents(ii).name};
-        
     end
 end
 
-% TODO: this needs an option for repeated experiments with different organs,
-% since palpation experiments will be done 2x, one per each organ
+for ii=1:4
+    [output]=readRobTxt(dataFolder,expName{ii});
+    save([dataFolder filesep 'Output' num2str(ii)],'output')
+end
+for ii=5:6
+    for jj=1:length(expOrgan{ii})
+        output=readRobTxt(dataFolder,expName{ii}{jj});
+        save([dataFolder filesep 'Output' num2str(ii) '_' num2str(jj)],'output')
+    end
+end
 
 %% Process artery-following experiment
-for ii=1%:4
+for ii=1:4
     organLabel=expOrgan{ii};
     
-    %% Read the robot data from txt file
-    [output,vProtocol]=readRobTxt(dataFolder,expName{ii});
+    %% Read the robot data from mat file
+    load([dataFolder filesep 'Output' num2str(ii)],'output')
     cur=output.psm_cur;
     des=output.psm_des;
     force=output.force;
@@ -125,14 +125,16 @@ for ii=1%:4
     HMicron=readTxtReg(registrationFilePath);
     micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
     
-    % Process data for when each piece of the experiment is started/finished
-    startTime = output.buttons.coag.time(1);
-    cameraTimes=output.buttons.camera.time(output.buttons.camera.push==1);
-    timeTrim=[startTime;repelem(cameraTimes,2)];
+    % Process data for when each piece of the experiment is
+    % started/finished using artery_status
+    firstIndex=find(output.artery_status.data==1,1);
+    timeTrim=output.artery_status.time(firstIndex);
+    for status=1:3
+        lastIndex=find(output.artery_status.data==status,1,'last')+1;
+        timeTrim=[timeTrim;output.artery_status.time(lastIndex);output.artery_status.time(lastIndex)];
+    end
+    timeTrim(end)=[];
     
-    %     What happens if there are more than 3 camera presses? That will break
-    %     the VF, so should be ok, just restart the experiment, have to throw
-    %     it out anyway
     [micronTrim,trimmedTime]=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
     curTrim=trimBetweenTime(cur.pos/1000,cur.time,timeTrim,true);
     curTrimContact=trimBetweenTime(curContact,curTimes,timeTrim,true);
@@ -195,7 +197,6 @@ for ii=1%:4
         
         % Plot the force norm data
         figure
-        
         plot(forceNorm)
     end
 end
@@ -208,7 +209,9 @@ for ii=5:6
         organLabel=expOrgan{ii}{jj};
         figure
         % Read data file
-        output=readRobTxt(dataFolder,expName{ii}{jj});
+%         output=readRobTxt(dataFolder,expName{ii}{jj});
+        load([dataFolder filesep 'Output' num2str(ii) '_' num2str(jj)],'output')
+
         cur=output.psm_cur;
         micronTip=output.micronTip;
 
@@ -219,33 +222,8 @@ for ii=5:6
         % Get Sphere Points
         [spheresInRobot,H1,sphereRaw] = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
 
-%% Find actual button times
-t=[output.buttons.camera.time];
-t=t(logical([output.buttons.camera.push]));
-tstart=t(1);
-tend=t(2);
-
-tSearch = output.poi_points.time;   
-test=tSearch(tSearch>tstart & tSearch<tend); %only look in between first and second cam button
-% 
-plusTime=[output.buttons.camplus.time];
-plusButton=[output.buttons.camplus.push];
-plusTime=plusTime(logical(plusButton));
-plusTime=plusTime(plusTime>tstart & plusTime<tend); % Trim plus times
-
-
-%
-minusTime=[output.buttons.camminus.time];
-minusButton=[output.buttons.camminus.push];
-minusTime=minusTime(logical(minusButton));
-minusTime=minusTime(minusTime>tstart & minusTime<tend); % Trim minus times
-
-
-        % Get times closest to selected POI times
-        t1 = output.poi_points.time;
-        t2 = output.psm_cur.time;
-        [~, idxB] = min( abs(t1(:)-t2(:)') ,[],2);
-        savedPoints=output.psm_cur.pos(idxB,:)/1000;
+        % Get selected POI times
+        savedPoints=output.display_points.data{end}';
 
         % Get Organ Points
         [organInRobot,H2,organRaw] = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
@@ -274,6 +252,7 @@ minusTime=minusTime(minusTime>tstart & minusTime<tend); % Trim minus times
         %     "located"
 
         % Total Experiment time in seconds (convert from nanoseconds)
+%         TODO: USE A 'PALPATION ON' VARIABLE TO CALCULATE TIME
         experimentLengthInS = (output.psm_cur.time(end)-output.psm_cur.time(1))/1E9;
     end
 end

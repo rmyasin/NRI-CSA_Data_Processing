@@ -1,9 +1,11 @@
-function [output,vProtocol]=readRobTxt(folder,filename,baseLabel)
+function [output]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
 titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text'};
 
+[~,dataFolderName]=fileparts(folder);
+output.userNumber=str2double(dataFolderName(5:end));
 
 robfile=fopen([folder filesep filename]);
 line=fgetl(robfile);
@@ -76,13 +78,13 @@ while line~=-1
             case 2 % psm_des
                 des.time=[des.time;numLine(1)];
                 des.pos=[des.pos;numLine(2:end)];
-            case 3 % micron
-                if vProtocol>=2
-                    cellArray=split(line);
-                    micronLabel=foundLabels(find(ismember(micronNames,cellArray{9})));
-                    numLine=[cellfun(@str2num,cellArray([1:8,10]));micronLabel]';
-                end
-                microndat=[microndat;numLine];
+%             case 3 % micron
+%                 if vProtocol>=2
+%                     cellArray=split(line);
+%                     micronLabel=foundLabels(find(ismember(micronNames,cellArray{9})));
+%                     numLine=[cellfun(@str2num,cellArray([1:8,10]));micronLabel]';
+%                 end
+%                 microndat=[microndat;numLine];
             case 4 % psm_joint
                 if length(numLine)>1 %If full data written, save data
                     joint.time=[joint.time;numLine(1)];
@@ -131,7 +133,7 @@ while line~=-1
                 buttons.coag.push = [buttons.coag.push;numLine(2:end)];
             case 16 %display_points
                 display_points.time=[display_points.time;numLine(1)];
-                display_points.data={display_points.data;reshape(numLine(2:end),3,[])};
+                display_points.data{end+1}=reshape(numLine(2:end),3,[]);
             case 17 %artery_status
                 artery_status.time=[artery_status.time;numLine(1)];
                 artery_status.data=[artery_status.data;numLine(2:end)];
@@ -145,66 +147,11 @@ while line~=-1
     line=fgetl(robfile);
 end
 
-%% Post-process raw Micron data
-if ~isempty(microndat)
-    if vProtocol ==1
-        foundLabels=unique(microndat(:,9));
-    else
-        foundLabels=unique(microndat(:,10));
-    end
-    nLab=length(foundLabels);
-    
-    for index=1:nLab
-        micron(index).label=foundLabels(index);
-        if vProtocol==1
-                indices=microndat(:,9)==micron(index).label;
-                micron(index).frame=microndat(indices,10);
-        else
-                indices=microndat(:,10)==micron(index).label;
-                micron(index).seq=microndat(indices,9);
-        end
-        micron(index).time=microndat(indices,1);
-        micron(index).pos=microndat(indices,2:4);
-        micron(index).quatraw=microndat(indices,5:8);
-        rot=quat2rotm(micron(index).quatraw);
-        micron(index).rot=rot;
-        micron(index).pose=[[micron(index).rot,reshape(micron(index).pos',3,1,[])];repmat([0,0,0,1],1,1,size(micron(index).pos,1))];
-    end
-    
-    %TODO: FINISH THIS - PROTOCOL CURRENTLY DOESN'T MATCH JHU ANYWAY, SO
-    %MAYBE BEST TO DROP THIS AND PICK BACK UP AFTER UNIFYING
-%     if baseLabel>=0 % Perform premultiplication by the inverse of the base marker
-%         base=micron([micron.label]==baseLabel);
-%         basePose=base.pose;
-%         
-%         for index=1:nLab
-%             if foundLabels(index)~=baseLabel
-%                 for jj=1:size(micron(index).pose,3)
-%                     matchFrame=micron(index).frame(jj);
-%                     if isempty(find(base.frame>matchFrame,1))
-%                         curBase=basePose(:,:,end);
-%                     elseif find(base.frame>matchFrame,1)==1
-%                         curBase=basePose(:,:,1);
-%                     else
-%                         curBase=basePose(:,:,find(base.frame>matchFrame,1)-1);
-%                     end
-%                     poseB(:,:,jj)=invtrans(curBase)*micron(index).pose(:,:,jj);
-%                 end
-%                 micron(index).pose=poseB;
-%                 micron(index).pos=squeeze(micron(index).pose(1:3,4,:))';
-%                 micron(index).rot=micron(index).pose(1:3,1:3,:);
-%             end
-%         end
-%     end
-else
-    micron=[];
-end
 %%
 fclose(robfile);
 
-
-dataList={cur,des,microndat,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons};
-titleList={'psm_cur','psm_des','micron','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons'};
+dataList={cur,des,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,text,vProtocol};
+titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','text','version'};
 output=cell2struct(dataList,titleList,2);
 
 end

@@ -194,7 +194,7 @@ def main():
 
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')
-  f.write('Version 3\n')
+  f.write('Version 4\n')
   for topicName in dataLists.keys():
     f.write(topicName+'\n')
     for i in range(len(dataLists[topicName])):
