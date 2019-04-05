@@ -93,7 +93,7 @@ def main():
   bagList=getMatchingRosBags(folderPath,findBag)
 
   # Set up lists of data to save and corresponding topics
-  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'text':[]}
+  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'text':[],'allow_points':[]}
   timeLists = copy.deepcopy(dataLists)
   topicNames= { 'force':  '/dvrk/PSM2/wrench',
           'psm_cur':  '/dvrk/PSM2/position_cartesian_current',
@@ -117,6 +117,7 @@ def main():
           'display_points': '/control/Vision_Point_List',
           'artery_status': '/control/arteryStatus',
           'text':'/control/textDisplay',
+          'allow_points':'/control/allowPoints',
         }
   
   topicList=list()
@@ -191,7 +192,9 @@ def main():
       elif topic==topicNames['text']:
         dataLists['text'].append(msg.data.__repr__())
         timeLists['text'].append(t)
-
+      elif topic==topicNames['allow_points']:
+        dataLists['allow_points'].append([msg.data])
+        timeLists['allow_points'].append(t)
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')
   f.write('Version 4\n')
