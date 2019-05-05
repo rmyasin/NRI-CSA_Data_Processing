@@ -44,9 +44,10 @@ Step one is to move from rosbags to txt files so that you can open up the data i
 
 ## Rosbag errors
 You may have a problem wherein the bag recording did not exit properly and even though recording is done, the bag is marked ".active". Run the following commands on your bag (replacing the reindex and fix commands with your desired bag to fix).
-  ```rosbag reindex Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag.active
-   rosbag fix Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag.active user22/Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag
-   ```
+  ```sh
+  rosbag reindex Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag.active
+  rosbag fix Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag.active user22/Palpation_VisualForce_20_2019-04-04-16-03-49_2.bag
+  ```
 
 ## MATLAB processing
 Now that we have .txt files...
