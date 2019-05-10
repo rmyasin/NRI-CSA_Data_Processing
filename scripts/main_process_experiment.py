@@ -95,18 +95,18 @@ def main():
   # Set up lists of data to save and corresponding topics
   dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'text':[],'allow_points':[]}
   timeLists = copy.deepcopy(dataLists)
-  topicNames= { 'force':  '/dvrk/PSM2/wrench',
-          'psm_cur':  '/dvrk/PSM2/position_cartesian_current',
+  topicNames= { 'force':  ['/dvrk/PSM2/wrench','/dvrk/PSM1/wrench'],
+          'psm_cur':  ['/dvrk/PSM2/position_cartesian_current','/dvrk/PSM1/position_cartesian_current'],
           'mtm_cur':  '/dvrk/MTMR/position_cartesian_current',
           'camera' :  '/dvrk/footpedals/camera',
           'cam_minus' :  '/dvrk/footpedals/cam_minus',
           'cam_plus' :  '/dvrk/footpedals/cam_plus',
           'clutch' :  '/dvrk/footpedals/clutch',
           'coag' :  '/dvrk/footpedals/coag',
-          'psm_des':  '/dvrk/PSM2/position_cartesian_desired',
+          'psm_des':  ['/dvrk/PSM2/position_cartesian_desired','/dvrk/PSM1/position_cartesian_desired'],
           'micronTip' : '/MicronTipPose',
           'micronValid':['/micron/PROBE_A/measured_cp_valid','/micron/PROBE_B/measured_cp_valid','/micron/PROBE_C/measured_cp_valid','/micron/PROBE_D/measured_cp_valid'],
-          'psm_joint':'/dvrk/PSM2/state_joint_current',
+          'psm_joint':['/dvrk/PSM2/state_joint_current','/dvrk/PSM1/state_joint_current'],
           'A' :   ['/A','/micron/PROBE_A/measured_cp',],
           'B' :   ['/B','/micron/PROBE_B/measured_cp',],
           'C' :   ['/C','/micron/PROBE_C/measured_cp',],
@@ -132,10 +132,10 @@ def main():
   for bagName in bagList:
     bag = rosbag.Bag(os.path.join(folderPath,bagName))
     for topic, msg, t in bag.read_messages(topics=topicList):
-      if topic == topicNames['force']:
+      if topic in topicNames['force']:
         dataLists['force'].append([msg.wrench.force.x,msg.wrench.force.y,msg.wrench.force.z])
         timeLists['force'].append(t)
-      elif topic == topicNames['psm_cur']:
+      elif topic in topicNames['psm_cur']:
         dataLists['psm_cur'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000])
         timeLists['psm_cur'].append(t)
       elif topic == topicNames['mtm_cur']:
@@ -156,7 +156,7 @@ def main():
       elif topic == topicNames['coag']:
         dataLists['coag'].append(msg.buttons)
         timeLists['coag'].append(t)
-      elif topic == topicNames['psm_des']:
+      elif topic in topicNames['psm_des']:
         dataLists['psm_des'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z])
         timeLists['psm_des'].append(t)
       elif topic == topicNames['micronTip']:
@@ -168,7 +168,7 @@ def main():
       elif topic in topicNames['micronValid']:
         dataLists['micronValid'].append([topic, msg.data])
         timeLists['micronValid'].append(t.to_nsec())
-      elif topic == topicNames['psm_joint']:
+      elif topic in topicNames['psm_joint']:
         dataLists['psm_joint'].append(list(msg.position))
         timeLists['psm_joint'].append(t)
       elif topic== topicNames['poi_points']:

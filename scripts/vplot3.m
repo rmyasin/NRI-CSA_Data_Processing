@@ -1,4 +1,7 @@
 function vplot3(inputMat,colorstring)
+if isempty(inputMat)
+    return
+end
 if size(inputMat,2)~=3
     error('Must input an NX3 matrix');
 end

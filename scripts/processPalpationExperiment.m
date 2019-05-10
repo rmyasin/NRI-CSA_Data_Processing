@@ -21,7 +21,12 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
         [spheresInRobot,H1,sphereRaw] = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
 
         % Get selected POI times
-        savedPoints=output.display_points.data{end}';
+        if isempty(output.display_points.time)
+            savedPoints=[];
+            warning('No Points Saved!');
+        else
+            savedPoints=output.display_points.data{end};
+        end
 
         % Get Organ Points
         [organInRobot,H2,organRaw] = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
@@ -31,12 +36,17 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
             vplot3(organInRobot')
             hold on
             vplot3(spheresInRobot','o')
-            vplot3(savedPoints,'x')
+            vplot3(savedPoints','x')
         end
         registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
         HMicron=readTxtReg(registrationFilePath);
-        micronHomog=H2*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
-        vplot3(micronHomog(1:3,:)');
+        
+        if isempty(micronTip.pos)
+            warning('No Micron Data!')
+        else
+            micronHomog=H2*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
+            vplot3(micronHomog(1:3,:)');
+        end
 
         %     TODO: need to convert robot selected points to closest on
         %     organ and then distance to the sphere center (which I think we've

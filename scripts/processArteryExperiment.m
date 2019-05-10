@@ -42,12 +42,6 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
     organInRobot = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
 
     %% Get micron data
-    % Transform Micron data from organ frame to robot frame
-    % (it's in organ frame for historical reasons, don't worry about why)
-    registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
-    HMicron=readTxtReg(registrationFilePath);
-    micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
-    
     % Process data for when each piece of the experiment is
     % started/finished using artery_status
     firstIndex=find(output.artery_status.data==1,1);
@@ -57,11 +51,22 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
         timeTrim=[timeTrim;output.artery_status.time(lastIndex);output.artery_status.time(lastIndex)];
     end
     timeTrim(end)=[];
-    
-    [micronTrim,trimmedTime]=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
+
+    % Transform Micron data from organ frame to robot frame
+    % (it's in organ frame for historical reasons, don't worry about why)
+    registrationFilePath = [dataFolder filesep regFolder filesep 'Micron2Phantom' num2str(label2num(organLabel)) '.txt'];
+    HMicron=readTxtReg(registrationFilePath);
+    if isempty(micronTip.pos)
+        micronHomog=[];
+        warning('No Micron Data')
+    else
+        micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
+        [micronTrim,trimmedTime]=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
+        
+    end
     curTrim=trimBetweenTime(cur.pos/1000,cur.time,timeTrim,true);
     curTrimContact=trimBetweenTime(curContact,curTimes,timeTrim,true);
-    
+
     %% TEMP PLOTTING, REMOVE AFTER TESTING
 %     TODO do an experiment with intentional liftoff during following to
 %     see the result and make sure this is captured
@@ -78,7 +83,7 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
 
     % Do we want project errors or 3D Errors?
     % 3D errors would correlate with force errors, correlates metrics
-    [arteryPlane.n,arteryPlane.p]=fitPlane(arteryInRobot);
+    [arteryPlane.n,arteryPlane.p]=fitPlane(arteryInRobot');
     
     for jj=1:3
         curProj{jj}=proj_onto_a_plane(arteryPlane,curTrim{jj});
@@ -115,7 +120,9 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
         vplot3(curContact)
         hold on
         vplot3(arteryInRobot)
-        vplot3(micronHomog(1:3,:)');
+        if ~isempty(micronHomog)
+            vplot3(micronHomog(1:3,:)');
+        end
         vplot3(organInRobot')
         
         % Plot the force norm data

@@ -2,7 +2,7 @@ function [output]=readRobTxt(folder,filename,baseLabel)
 if nargin<3
     baseLabel=-1;
 end
-titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text'};
+titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text','allow_points'};
 
 [~,dataFolderName]=fileparts(folder);
 output.userNumber=str2double(dataFolderName(5:end));
@@ -64,6 +64,9 @@ buttons.camminus.time=[];
 buttons.camminus.push=[];
 buttons.clutch.time=[];
 buttons.clutch.push=[];
+
+allow_points.time=[];
+allow_points.data=[];
 
 while line~=-1
     temp=find(strcmp(line,titleList));
@@ -141,6 +144,10 @@ while line~=-1
                 timeIndex=strfind(line,' ');
                 text.time=[text.time;str2num(line(2:timeIndex-1))];
                 text.data={text.data;line(timeIndex(1)+2:end-1)};
+            case 19 % allow_points
+                timeIndex=strfind(line,' ');
+                allow_points.time=[allow_points.time;str2num(line(2:timeIndex-1))];
+                allow_points.data=[allow_points.data;strcmp(line(timeIndex(1)+1:end),'True')];
 
         end
     end
