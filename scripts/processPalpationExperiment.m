@@ -6,7 +6,6 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
     for jj=1:length(expOrgan{ii})
         % Read in organ, get ground truth location of organ/spheres
         organLabel=expOrgan{ii}{jj};
-        figure
         
         % Read data file
         load([dataFolder filesep 'matlab' filesep 'Output' num2str(ii) '_' num2str(jj)],'output');
@@ -32,6 +31,7 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
         [organInRobot,H2,organRaw] = getOrganPoints([dataFolder filesep regFolder],organLabel,organFolder);
 
         if plotOption
+            figure
             % Plot results
             vplot3(organInRobot')
             hold on
@@ -45,7 +45,9 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
             warning('No Micron Data!')
         else
             micronHomog=H2*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
-            vplot3(micronHomog(1:3,:)');
+            if plotOption
+                vplot3(micronHomog(1:3,:)');
+            end
         end
 
         %     TODO: need to convert robot selected points to closest on
@@ -61,8 +63,9 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
         %     "located"
 
         % Total Experiment time in seconds (convert from nanoseconds)
-%         TODO: USE A 'PALPATION ON' VARIABLE TO CALCULATE TIME
+%         TODO: USE THE 'PALPATION ON' VARIABLE TO CALCULATE TIME
         experimentLengthInS = (output.psm_cur.time(end)-output.psm_cur.time(1))/1E9;
         
     end
-metrics. experimentLengthInS=experimentLengthInS;
+metrics.experimentLengthInS=experimentLengthInS;
+end

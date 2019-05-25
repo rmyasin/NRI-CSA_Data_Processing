@@ -29,7 +29,7 @@ end
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%% TODO: actually implement metrics%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% TODO: implement palpation metrics %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 
@@ -37,17 +37,18 @@ for userNumber=1:8
     dataFolder = [baseFolder num2str(userNumber)];
     % Get information about each user's set of experiments
     [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
-    plotOption=false;
+    plotOption=true;
     %% Process artery-following experiments
-    for ii=arteryExperiments
-        arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii},regTimes,regNames,plotOption);
-    end
+%     for ii=arteryExperiments
+%         arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii},regTimes,regNames,plotOption,0);
+%     end
     
     %% Process palpation experiments
-%     for ii=palpationExperiments
-%         palpationMetrics(userNumber,ii-4)=processPalpationExperiment(dataFolder,ii,expOrgan,regTimes,regNames,plotOption);
-%     end
+    for ii=palpationExperiments
+        palpationMetrics(userNumber,ii-4)=processPalpationExperiment(dataFolder,ii,expOrgan,regTimes,regNames,plotOption);
+    end
 end
 
-plotArteryStatistics(arteryMetrics)
+
+% plotArteryStatistics(arteryMetrics)
 % save('arteryMetrics','arteryMetrics')

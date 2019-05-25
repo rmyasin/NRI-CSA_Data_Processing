@@ -1,0 +1,76 @@
+clear
+close all
+clc
+
+
+% setenv('ARMA_CL','/home/arma/Dev/ACL.git')
+% setenv('CPDREG','/home/arma/catkin_ws/src/cpd-registration')
+% cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
+
+saveData=false;
+% restoredefaultpath
+% addpath(genpath(getenv('ARMA_CL')))
+% addpath(genpath('Utilities'))
+
+baseFolder='R:\Projects\NRI\User_Study\Data\VU\user';
+arteryExperiments=1:4;
+palpationExperiments=5:6;
+
+if saveData
+    for userNumber=1:8 %#ok<UNRCH>
+        dataFolder = [baseFolder num2str(userNumber)];
+        % Get information about each user's set of experiments
+        [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
+        
+        % Process txt files into matlab and save .mat files of experiment info
+        SaveExperimentData(dataFolder,expOrgan,expName,arteryExperiments,palpationExperiments)
+    end
+end
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% TODO: actually implement metrics%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+for userNumber=1:8
+    dataFolder = [baseFolder num2str(userNumber)];
+    % Get information about each user's set of experiments
+    [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
+    plotOption=false;
+    %% Process artery-following experiments
+    for ii=arteryExperiments
+        arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii},regTimes,regNames,plotOption);
+    end
+    
+    %% Process palpation experiments
+%     for ii=palpationExperiments
+%         palpationMetrics(userNumber,ii-4)=processPalpationExperiment(dataFolder,ii,expOrgan,regTimes,regNames,plotOption);
+%     end
+end
+
+for ii=1:4
+    arteryStatistics.coverage(ii) = mean([arteryMetrics(:,ii).coverage]);
+    arteryStatistics.meanDistance(ii) = mean([arteryMetrics(:,ii).meanDistance]);
+    arteryStatistics.meanProjDistance(ii) = mean([arteryMetrics(:,ii).meanProjDistance]);
+    arteryStatistics.forceError(ii) = mean([arteryMetrics(:,ii).forceError]);
+end
+
+coverageMat=[[arteryMetrics(:,1).coverage]',[arteryMetrics(:,2).coverage]',[arteryMetrics(:,3).coverage]',[arteryMetrics(:,4).coverage]'];
+coverageCell={[arteryMetrics(:,1).coverage],[arteryMetrics(:,2).coverage],[arteryMetrics(:,3).coverage],[arteryMetrics(:,4).coverage]};
+
+coverageMat=[[arteryMetrics(:,1).coverage]',[arteryMetrics(:,2).coverage]',[arteryMetrics(:,3).coverage]',[arteryMetrics(:,4).coverage]'];
+coverageCell={[arteryMetrics(:,1).coverage],[arteryMetrics(:,2).coverage],[arteryMetrics(:,3).coverage],[arteryMetrics(:,4).coverage]};
+
+coverageMat=[[arteryMetrics(:,1).coverage]',[arteryMetrics(:,2).coverage]',[arteryMetrics(:,3).coverage]',[arteryMetrics(:,4).coverage]'];
+coverageCell={[arteryMetrics(:,1).coverage],[arteryMetrics(:,2).coverage],[arteryMetrics(:,3).coverage],[arteryMetrics(:,4).coverage]};
+
+coverageMat=[[arteryMetrics(:,1).coverage]',[arteryMetrics(:,2).coverage]',[arteryMetrics(:,3).coverage]',[arteryMetrics(:,4).coverage]'];
+coverageCell={[arteryMetrics(:,1).coverage],[arteryMetrics(:,2).coverage],[arteryMetrics(:,3).coverage],[arteryMetrics(:,4).coverage]};
+
+
+myBoxPlot(coverageCell,{'Unaided','Visual','Haptic VF','Auto VF'})
+
+
+bar(categorical({'A','B','C','D'}),mean(coverageMat))
+

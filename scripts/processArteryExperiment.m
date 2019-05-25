@@ -1,4 +1,3 @@
-%% function processArteryExperiment
 % Takes saved data from SaveExperimentData() and calculates metrics for NRI
 % user study of "ablation" along a path
 % % Inputs:
@@ -11,7 +10,10 @@
 % % Outputs:
 % metrics - 
 
-function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,regNames,plotOption)
+function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,regNames,plotOption,useMicron)
+if nargin<7
+    useMicron=false;
+end
     %% Pick out the right experiment number and organ number
     ii=expIndex;
     organLabel=expOrgan;
@@ -55,13 +57,17 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
     %% Get micron data
     % Process data for when each piece of the experiment is
     % started/finished using artery_status (corresponds to pedal presses)
-    firstIndex=find(output.artery_status.data==1,1);
-    timeTrim=output.artery_status.time(firstIndex);
-    for status=1:2:5
-        lastIndex=find(output.artery_status.data==status,1,'last')+1;
-        timeTrim=[timeTrim;output.artery_status.time(lastIndex);output.artery_status.time(lastIndex)];
+%     firstIndex=find(output.artery_status.data==1,1);
+%     timeTrim=output.artery_status.time(firstIndex);
+    timeTrim=[];
+    for status=[1:6]
+        lastIndex=find(output.artery_status.data==status,1,'last');
+        timeTrim=[timeTrim;output.artery_status.time(lastIndex)];
     end
-    timeTrim(end)=[];
+    
+    if size(unique(output.artery_status.data))~=size(output.artery_status.data)
+        pause;
+    end
 
     % Transform Micron data from organ frame to robot frame
     % (it's in organ frame for historical reasons, don't worry about why)
@@ -72,11 +78,18 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
         warning('No Micron Data')
     else
         micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
-        [micronTrim,trimmedTime]=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
+        micronTrim=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
+        [micronContact,micronContactTimes]=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,contactTrimTimes);
+        micronTrimContact=trimBetweenTime(micronContact,micronContactTimes,timeTrim,true);
     end
     curTrim=trimBetweenTime(cur.pos/1000,cur.time,timeTrim,true);
     curTrimContact=trimBetweenTime(curContact,curTimes,timeTrim,true);
 
+    if useMicron
+        curTrim=micronTrim;
+        curTrimContact=micronTrimContact;
+    end
+    
     %% Find distance from the line
     % Metric 1: Lateral error and force tracking while in contact:
     % If the user skips a portion of the curve with no contact, this error metric would not see that.
@@ -85,11 +98,11 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
     % 3D errors would correlate with force errors, correlates metrics
     [arteryPlane.n,arteryPlane.p]=fitPlane(arteryInRobot');
     
-    if plotOption
-        vplot3(arteryInRobot)
-        hold on
-        plotPlane(arteryPlane.n,arteryPlane.p,0.04)
-    end
+%     if plotOption
+%         vplot3(arteryInRobot)
+%         hold on
+%         plotPlane(arteryPlane.n,arteryPlane.p,0.04)
+%     end
     
     for jj=1:3
         curProj=proj_onto_a_plane(arteryPlane,curTrim{jj});
@@ -99,10 +112,10 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
         meanDistError(jj)=mean(distance);
         meanProjDist(jj)=mean(dProj);
 
-        if plotOption
-            vplot3(curProj,'.')
-            hold on
-        end
+%         if plotOption
+%             vplot3(curProj,'.')
+%             hold on
+%         end
     end
 
     
@@ -128,6 +141,8 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
     metrics.meanDistance=meanDistError;
     metrics.meanProjDistance=meanProjDist;
     metrics.forceError=forceError;
+    times=diff(timeTrim)/1E9;
+    metrics.completionTime=times(1:2:end)';
 
     %% Plot results
     if plotOption
@@ -140,9 +155,5 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
             vplot3(micronHomog(1:3,:)');
         end
         vplot3(organInRobot')
-        
-        % Plot the force norm data
-        figure
-        plot(forceNorm)
     end
 end
