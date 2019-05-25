@@ -8,7 +8,7 @@ function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,r
     organLabel=expOrgan;
     
     %% Read the robot data from mat file
-    load([dataFolder filesep 'Output' num2str(ii)],'output')
+    load([dataFolder filesep 'matlab' filesep 'Output' num2str(ii)],'output')
     cur=output.psm_cur;
     des=output.psm_des;
     force=output.force;

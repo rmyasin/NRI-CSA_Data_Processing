@@ -1,11 +1,7 @@
-function [output]=readRobTxt(folder,filename,baseLabel)
-if nargin<3
-    baseLabel=-1;
-end
+function [output]=readRobTxt(folder,filename)
 titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text','allow_points'};
 
 [~,dataFolderName]=fileparts(folder);
-output.userNumber=str2double(dataFolderName(5:end));
 
 robfile=fopen([folder filesep filename]);
 line=fgetl(robfile);
@@ -143,7 +139,7 @@ while line~=-1
             case 18 %text
                 timeIndex=strfind(line,' ');
                 text.time=[text.time;str2num(line(2:timeIndex-1))];
-                text.data={text.data;line(timeIndex(1)+2:end-1)};
+                text.data{end+1}=line(timeIndex(1)+2:end-1);
             case 19 % allow_points
                 timeIndex=strfind(line,' ');
                 allow_points.time=[allow_points.time;str2num(line(2:timeIndex-1))];
@@ -157,8 +153,10 @@ end
 %%
 fclose(robfile);
 
-dataList={cur,des,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,text,vProtocol};
-titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','text','version'};
+dataList={cur,des,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,text,allow_points,vProtocol};
+titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','text','allow_points','version'};
 output=cell2struct(dataList,titleList,2);
+
+output.userNumber=str2double(dataFolderName(5:end));
 
 end

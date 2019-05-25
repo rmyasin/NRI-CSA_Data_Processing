@@ -9,7 +9,7 @@ organFolder=[cpd_dir filesep 'userstudy_data' filesep 'PointCloudData' filesep '
         figure
         
         % Read data file
-        load([dataFolder filesep 'Output' num2str(ii) '_' num2str(jj)],'output');
+        load([dataFolder filesep 'matlab' filesep 'Output' num2str(ii) '_' num2str(jj)],'output');
         cur=output.psm_cur;
         micronTip=output.micronTip;
 
