@@ -151,9 +151,9 @@ end
         vplot3(curContact)
         hold on
         vplot3(arteryInRobot)
-        if ~isempty(micronHomog)
-            vplot3(micronHomog(1:3,:)');
+        if ~isempty(micronContact)
+            vplot3(micronContact(:,1:3));
         end
-        vplot3(organInRobot')
+        vplot3(organInRobot','.')
     end
 end

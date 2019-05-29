@@ -1,4 +1,4 @@
-function vplot3(inputMat,colorstring)
+function vplot3(inputMat,varargin)
 if isempty(inputMat)
     return
 end
@@ -7,8 +7,10 @@ if size(inputMat,2)~=3
 end
 
 if nargin<2
-    colorstring='';
+    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3))
+else
+    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3),varargin{:})
 end
 
-plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3),colorstring)
+
 end

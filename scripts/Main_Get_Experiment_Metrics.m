@@ -3,14 +3,7 @@ close all
 clc
 
 
-% setenv('ARMA_CL','/home/arma/Dev/ACL.git')
-% setenv('CPDREG','/home/arma/catkin_ws/src/cpd-registration')
-% cpd_dir ='/home/arma/catkin_ws/src/cpd-registration';
-
 saveData=false;
-% restoredefaultpath
-% addpath(genpath(getenv('ARMA_CL')))
-% addpath(genpath('Utilities'))
 
 baseFolder='R:\Projects\NRI\User_Study\Data\VU\user';
 arteryExperiments=1:4;
@@ -27,28 +20,31 @@ if saveData
     end
 end
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%% TODO: implement palpation metrics %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
+%% Process experiments
 
 for userNumber=1:8
     dataFolder = [baseFolder num2str(userNumber)];
     % Get information about each user's set of experiments
     [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
+    
     plotOption=true;
     %% Process artery-following experiments
-%     for ii=arteryExperiments
-%         arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii},regTimes,regNames,plotOption,0);
-%     end
+    for ii=arteryExperiments
+        arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii},regTimes,regNames,plotOption,0);
+    end
     
     %% Process palpation experiments
     for ii=palpationExperiments
+        if size(expOrgan{ii})~=4
+            error('Incorrect number of experiments, change the data');
+        end
         palpationMetrics(userNumber,ii-4)=processPalpationExperiment(dataFolder,ii,expOrgan,regTimes,regNames,plotOption);
     end
 end
 
+%% Plot statistics
+plotArteryStatistics(arteryMetrics)
+save('arteryMetrics','arteryMetrics')
 
-% plotArteryStatistics(arteryMetrics)
-% save('arteryMetrics','arteryMetrics')
+plotPalpationStatistics(palpationMetrics)
+save('palpationMetrics','palpationMetrics')
