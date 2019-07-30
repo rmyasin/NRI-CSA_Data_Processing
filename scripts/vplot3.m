@@ -7,10 +7,9 @@ if size(inputMat,2)~=3
 end
 
 if nargin<2
-    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3))
+    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3));
 else
-    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3),varargin{:})
+    plot3(inputMat(:,1),inputMat(:,2),inputMat(:,3),varargin{:});
 end
-
 
 end

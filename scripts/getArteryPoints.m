@@ -1,4 +1,5 @@
 function [arteryInRobot,HOrgan,arteryPointsRaw] = getArteryPoints(regFolder,organLabel,organFolder)
+fclose('all');
 temp=load([organFolder filesep 'Kidney_' organLabel '_Artery_Pts.mat']);
 arteryPointsRaw=temp.ptOutput;
 clear('temp');

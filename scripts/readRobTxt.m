@@ -1,5 +1,5 @@
 function [output]=readRobTxt(folder,filename)
-titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','text','allow_points'};
+titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','string_status','text','allow_points'};
 
 [~,dataFolderName]=fileparts(folder);
 
@@ -32,6 +32,8 @@ display_points.data={};
 
 artery_status.time=[];
 artery_status.data=[];
+string_status.time=[];
+string_status.data=[];
 
 text.time=[];
 text.data={};
@@ -136,11 +138,14 @@ while line~=-1
             case 17 %artery_status
                 artery_status.time=[artery_status.time;numLine(1)];
                 artery_status.data=[artery_status.data;numLine(2:end)];
-            case 18 %text
+            case 18 %string_status
+                string_status.time=[string_status.time;numLine(1)];
+                string_status.data=[string_status.data;numLine(2:end)];
+            case 19 %text
                 timeIndex=strfind(line,' ');
                 text.time=[text.time;str2num(line(2:timeIndex-1))];
                 text.data{end+1}=line(timeIndex(1)+2:end-1);
-            case 19 % allow_points
+            case 20 % allow_points
                 timeIndex=strfind(line,' ');
                 allow_points.time=[allow_points.time;str2num(line(2:timeIndex-1))];
                 allow_points.data=[allow_points.data;strcmp(line(timeIndex(1)+1:end),'True')];
