@@ -31,7 +31,6 @@ def locateInList(inlist,element):
     if inlist[i]==element:
       return i
 
-
 def getMatchingRosBags(folder,bagName):
   bagList=[bagName]
 
@@ -93,11 +92,12 @@ def main():
   bagList=getMatchingRosBags(folderPath,findBag)
 
   # Set up lists of data to save and corresponding topics
-  dataLists = {'force':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'text':[],'allow_points':[]}
+  dataLists = {'force':[],'force_gt':[],'psm_cur':[],'mtm_cur':[],'camera':[],'cam_minus':[],'cam_plus':[],'clutch':[],'coag':[],'psm_des':[],'micronTip':[],'micron':[],'micronValid':[],'psm_joint':[],'poi_points':[],'poi_clear':[],'display_points':[],'artery_status':[],'string_status':[],'text':[],'allow_points':[],'mag_pos_cur':[],'mag_vec_cur':[]}
   timeLists = copy.deepcopy(dataLists)
-  topicNames= { 'force':  ['/dvrk/PSM2/wrench','/dvrk/PSM1/wrench'],
+  topicNames= {'force':  ['/dvrk/PSM2/wrench','/dvrk/PSM1/wrench','/dvrk/PSM1/wrench_current'],
+          'force_gt':  '/dvrk/PSM1/wrench_current_gt',
           'psm_cur':  ['/dvrk/PSM2/position_cartesian_current','/dvrk/PSM1/position_cartesian_current'],
-          'mtm_cur':  '/dvrk/MTMR/position_cartesian_current',
+          'mtm_cur':  ['/dvrk/MTMR/position_cartesian_current','/dvrk/MTML/position_cartesian_current'],
           'camera' :  '/dvrk/footpedals/camera',
           'cam_minus' :  '/dvrk/footpedals/cam_minus',
           'cam_plus' :  '/dvrk/footpedals/cam_plus',
@@ -116,8 +116,11 @@ def main():
           'poi_clear': '/dvrk_vision/clear_POI',
           'display_points': '/control/Vision_Point_List',
           'artery_status': '/control/arteryStatus',
+          'string_status': '/control/stringStatus',
           'text':'/control/textDisplay',
           'allow_points':'/control/allowPoints',
+          'mag_pos_cur':'/dvrk/PSM1/mag_cartesian_current',
+          'mag_vec_cur':'/dvrk/PSM1/mag_vec_current'
         }
   
   topicList=list()
@@ -135,10 +138,13 @@ def main():
       if topic in topicNames['force']:
         dataLists['force'].append([msg.wrench.force.x,msg.wrench.force.y,msg.wrench.force.z])
         timeLists['force'].append(t)
+      elif topic == topicNames['force_gt']:
+        dataLists['force_gt'].append([msg.wrench.force.x,msg.wrench.force.y,msg.wrench.force.z])
+        timeLists['force_gt'].append(t)
       elif topic in topicNames['psm_cur']:
         dataLists['psm_cur'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000])
         timeLists['psm_cur'].append(t)
-      elif topic == topicNames['mtm_cur']:
+      elif topic in topicNames['mtm_cur']:
         dataLists['mtm_cur'].append([msg.pose.position.x*1000,msg.pose.position.y*1000,msg.pose.position.z*1000])
         timeLists['mtm_cur'].append(t)
       elif topic == topicNames['camera']:
@@ -178,7 +184,6 @@ def main():
         dataLists['poi_clear'].append([1])
         timeLists['poi_clear'].append(t)
       elif topic== topicNames['display_points']:
-        # ipdb.set_trace()
         tempList=list()
         for pose in msg.poses:
           tempList.append(pose.position.x)
@@ -189,12 +194,21 @@ def main():
       elif topic==topicNames['artery_status']:
         dataLists['artery_status'].append([msg.data])
         timeLists['artery_status'].append(t)
+      elif topic==topicNames['string_status']:
+        dataLists['string_status'].append([msg.data])
+        timeLists['string_status'].append(t)
       elif topic==topicNames['text']:
         dataLists['text'].append(msg.data.__repr__())
         timeLists['text'].append(t)
       elif topic==topicNames['allow_points']:
         dataLists['allow_points'].append([msg.data])
         timeLists['allow_points'].append(t)
+      elif topic==topicNames['mag_pos_cur']:
+        dataLists['mag_pos_cur'].append([msg.x,msg.y,msg.z])
+        timeLists['mag_pos_cur'].append(t)
+      elif topic==topicNames['mag_vec_cur']:
+        dataLists['mag_vec_cur'].append([msg.x,msg.y,msg.z])
+        timeLists['mag_vec_cur'].append(t)
   # Write all the data to a txt file for subsequent processing in matlab (or elsewhere)
   f=open(os.path.join(outFolderPath,filename+'.txt'),'w')
   f.write('Version 4\n')
