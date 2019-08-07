@@ -4,7 +4,11 @@ function plotPalpationStatistics(palpationMetrics)
 %     palpationStatistics.time(ii) = mean([palpationMetrics(:,ii).completionTime]);
 % end
 
-timeMat=[[palpationMetrics(:,1).completionTime]',[palpationMetrics(:,2).completionTime]'];
+% timeMat=[[palpationMetrics(:,1).completionTime]',[palpationMetrics(:,2).completionTime]'];
+timeVec=[[palpationMetrics(:,1).completionTime]';[palpationMetrics(:,2).completionTime]'];
+timeCategory = [repmat({'Haptic'},length([palpationMetrics(:,1).completionTime]),1);
+                    repmat({'Visual'},length([palpationMetrics(:,2).completionTime]),1)];
+
 timeCell={[palpationMetrics(:,1).completionTime],[palpationMetrics(:,2).completionTime]};
 
 % How many spheres were found
@@ -36,6 +40,13 @@ tmp=[palpationMetrics(:,2).closeDistCenter];
 closesDistGP=vertcat(tmp{:});
 closeCellCenter={closeDistHaptic,closesDistGP};
 
+distVec=[closeCellCenter{1};closeCellCenter{2}];
+distCategory = [repmat({'Haptic'},length(closeCellCenter{1}),1);
+                    repmat({'Visual'},length(closeCellCenter{2}),1)];
+
+
+
+
 tmp=[palpationMetrics(:,1).distanceList];
 distanceHaptic=vertcat(tmp{:});
 tmp=[palpationMetrics(:,2).distanceList];
@@ -63,7 +74,7 @@ title('Percent of Tumors Found')
 ylabel('Percent Found')
 prettyFigure
 
-% 
+
 % figure
 % myBoxPlot(extraCell,expNames)
 % title('Extra Tumors Found')
@@ -111,9 +122,15 @@ prettyFigure
 
 %% ANOVA analysis
 % 
-% figure
-% [p,tbl,stats]=anova1(timeMat,expNames,'off');
-% multcompare(stats)
-% title('Completion Time')
+figure
+[p,tbl,stats]=anova1(timeVec,timeCategory,'off');
+c=multcompare(stats)
+title('Completion Time')
+
+figure
+[p,tbl,stats]=anova1(distVec,distCategory,'off');
+c=multcompare(stats)
+title('Distance From GT')
+
 
 end
