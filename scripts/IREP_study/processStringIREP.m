@@ -20,7 +20,8 @@ pullForcesEst=interp1(dataStruct.force.time,dataStruct.force.data,pullTimes(1:en
 
 
 forceGTInterp=interp1(dataStruct.force_gt.time,dataStruct.force_gt.data,dataStruct.force.time);    
-estimationErrorList = (dataStruct.force.data-forceGTInterp);
+okIndex=~any(isnan(forceGTInterp),2);
+estimationErrorList = (dataStruct.force.data(okIndex,:)-forceGTInterp(okIndex,:));
 metrics.stringPullForce = pullForces;
 metrics.estimationError = rms(rowNorm(estimationErrorList));
 metrics.pullErrors=rowNorm(pullForces)-desiredForce;

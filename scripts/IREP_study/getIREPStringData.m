@@ -1,4 +1,4 @@
-function stringData=getIREPStringData(dataFolder,userList,saveData)
+function [stringData,trainingData]=getIREPStringData(dataFolder,userList,saveData)
 
 for ii=1:length(userList)
     userNumber=userList(ii);
@@ -24,8 +24,13 @@ for ii=1:length(userList)
     names=nameList(index);
     for jj=1:length(names)
         load([strcat(folders{jj},filesep,names{jj})]);
+        pullType = str2double(names{jj}(strfind(names{jj},'String_')+7));
+        if isnan(pullType)
+            trainingData{ii} = output;
+        else
         stringData{ii,jj}=output;
-        stringData{ii,jj}.pullType =str2double(names{jj}(strfind(names{jj},'String_')+7));
+        stringData{ii,jj}.pullType =pullType;
+        end
     end
     end
 end

@@ -12,11 +12,11 @@ load([dataFolder filesep 'GT_artery_2019-07-16'],'arteryPoints');
 
 %% Get Ablation Data
 dataFolder = 'R:\Projects\NRI\User_Study\Data\IREP';
-userList=40;
+userList=1:8;
 arteryData=getIREPArteryData(dataFolder,userList,saveData);
 
 %% Get Ablation metrics
-plotOption=true;
+plotOption=false;
 
 % FS Feedback
 for ii=1:length(userList)
@@ -25,42 +25,146 @@ for ii=1:length(userList)
         if arteryData{ii,jj}.pathType ~= jj
             warning('Bad Data at %d, %d',ii,jj)
         end
-        arteryMetrics{ii,jj}=processArteryIREP(arteryData{ii,jj},arteryPoints,plotOption);
+        arteryMetrics(ii,jj)=processArteryIREP(arteryData{ii,jj},arteryPoints,plotOption);
     end
 end
 
-visualError = mean(arteryMetrics{1,1}.forceErrorVert)
-fsError = mean(arteryMetrics{1,2}.forceErrorVert)
-gtError = mean(arteryMetrics{1,3}.forceErrorVert)
+%%Boxplot of forces
+VSForce=[arteryMetrics(:,1).forceMeanAppliedVert]';
+FSForce=[arteryMetrics(:,2).forceMeanAppliedVert]';
+GTForce=[arteryMetrics(:,3).forceMeanAppliedVert]';
+figure
+myBoxPlot({VSForce,FSForce,GTForce},{'Unaided','Estimated Feedback','True Feedback'},1)
+hHandle=hline(0.75,'r--');
+prettyFigure
+title('Palpation Forces')
+ylabel('Vertical Force Applied (N)')
+legend(hHandle,'Desired Force Level')
+prettyFigure
+saveFigPDF('StudyPalpationForces.pdf')
 
-% ES = (visualError-fsError)/std([arteryMetrics{1,1}.forceMeanAppliedVert-0.75,arteryMetrics{1,2}.forceMeanAppliedVert-0.75])
-% this applies to a minimum of between 27 (0.9) and 23 (1.0) N, so we'll do
-% 5 per user for a total of 40 to be conservative
+%%Distance from center
+VSDist=[arteryMetrics(:,1).meanDistance]';
+FSDist=[arteryMetrics(:,2).meanDistance]';
+GTDist=[arteryMetrics(:,3).meanDistance]';
 
+figure
+myBoxPlot({VSDist,FSDist,GTDist},{'Unaided','Estimated Feedback','True Feedback'})
+prettyFigure
+axis([0.5 3.5 0 12])
+title('Line Distance')
+ylabel('Distance from Line Center (mm)')
+saveFigPDF('StudyPalpationDistance.pdf')
+
+distVec=[VSDist;FSDist;GTDist];
+distCat = [repmat({'Unaided'},length(VSDist),1);
+          repmat({'Sensed'},length(FSDist),1);
+          repmat({'Ground Truth'},length(GTDist),1)];
+[p,tbl,stats]=anova1(distVec,distCat,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValDist = c(:,end) 
+%1,2: 0.3107 
+%1,3: 0.1212 
+%2,3: 0.8641
+mean(VSDist) %4.99 mm
+mean(FSDist) %4.46 mm
+mean(GTDist) %4.27 mm
+
+% Brown forsyth test shows no significant difference in variance
+p=vartestn([VSDist;FSDist],[ones(size(VSDist));zeros(size(FSDist))],'TestType','BrownForsythe','display','off')  %p=0.60
+p=vartestn([VSDist;GTDist],[ones(size(VSDist));zeros(size(GTDist))],'TestType','BrownForsythe','display','off')  %p=0.15
+p=vartestn([FSDist;GTDist],[ones(size(FSDist));zeros(size(GTDist))],'TestType','BrownForsythe','display','off')  %p=0.37
+var(VSDist) %3.5274
+var(FSDist) %2.7671
+var(GTDist) %1.7311
+
+%%Tukey cramer test of means - no statistically significant difference
+%%between *any* of the forces
+forceVec=[VSForce;FSForce;GTForce];
+forceCategory = [repmat({'Unaided'},length(VSForce),1);
+                    repmat({'Sensed'},length(FSForce),1);
+                    repmat({'Ground Truth'},length(GTForce),1)];
+
+figure
+[p,tbl,stats]=anova1(forceVec,forceCategory,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValForcce = c(:,end)
+title('Palpation Forces')
+
+% Brown forsyth test shows significance FS and GT, VS and GT, not VS and FS
+p=vartestn([VSForce;FSForce],[ones(size(VSForce));zeros(size(FSForce))],'TestType','BrownForsythe','display','off')  %p=0.12
+p=vartestn([VSForce;GTForce],[ones(size(VSForce));zeros(size(GTForce))],'TestType','BrownForsythe','display','off')  %p=0.0003
+p=vartestn([FSForce;GTForce],[ones(size(FSForce));zeros(size(GTForce))],'TestType','BrownForsythe','display','off')  %p=0.034
+
+% Variances of different groups
+var(VSForce) % 0.05
+var(FSForce) % 0.03
+var(GTForce) % 0.0125
+
+% % Mean errors
+mean(0.75-VSForce) %0.14
+mean(0.75-FSForce) %0.12
+mean(0.75-GTForce) %0.18
+
+% Mean force applied
+mean(VSForce) % 0.60
+mean(FSForce) %0.62 - slightly better than GT!
+mean(GTForce) %0.56
 
 %% Get String data
-% dataFolder = 'R:\Projects\NRI\Force_Sensing\IREP_User_Study\Data\IREP';
-% User 30 - new SVR, full experiment
-% User 31 - old SVR, just fsense
-% User 32 - vertical pulling, just fsense
-userList=40; 
-% saveData=true;
-
-stringData=getIREPStringData(dataFolder,userList,saveData);
-plotOption=true;
+[stringData,trainingData]=getIREPStringData(dataFolder,userList,saveData);
+plotOption=false;
 for ii=1:size(stringData,1)
     userNumber=userList(ii);
     desiredForce=0.75;
 
     for jj=1:size(stringData,2)
-        stringMetrics{ii,jj} = processStringIREP(stringData{ii,jj},desiredForce,plotOption);
+        stringMetrics(ii,jj) = processStringIREP(stringData{ii,jj},desiredForce,plotOption);
     end
 end
-% 
-VisualError = [stringMetrics{1,1}.rmsPullError]
-FSError = [stringMetrics{1,2}.rmsPullError]
-GTError = [stringMetrics{1,3}.rmsPullError]
 
-% E/S is around 0.55, requires around N=75, so require 10 pulls (probably
-% less would be fine, but why not)
+VSPullForce = rowNorm(vertcat(stringMetrics(:,1).stringPullForce));
+FSPullForce = rowNorm(vertcat(stringMetrics(:,2).stringPullForce));
+GTPullForce = rowNorm(vertcat(stringMetrics(:,3).stringPullForce));
+
+%% Plot pulling force on string
+figure
+myBoxPlot({VSPullForce,FSPullForce,GTPullForce},{'Unaided','Estimated Feedback','True Feedback'},0)
+hHandle=hline(0.75,'r--');
+title('Pulling Forces')
+ylabel('Norm Force Applied (N)')
+legend(hHandle,'Desired Force Level')
+prettyFigure
+saveFigPDF('StudyPullingForces.pdf')
+
+pullVec=[VSPullForce;FSPullForce;GTPullForce];
+pullCategory = [repmat({'Unaided'},length(VSPullForce),1);
+                    repmat({'Sensed'},length(FSPullForce),1);
+                    repmat({'Ground Truth'},length(GTPullForce),1)];
+
+figure
+[p,tbl,stats]=anova1(pullVec,pullCategory,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValPull = c(:,end)
+title('String Pull Forces')
+% All groups are statistically significantly different, but the unaided has
+% a better mean pulling force than pulling with the sensed force
+mean(VSPullForce) % 0.865
+mean(FSPullForce) % 1.07
+mean(GTPullForce) % 0.759
+
+% Mean Error (t test says significantly different, which you'd expect since
+% the mean pulling force is different)
+mean(abs(VSPullForce-0.75)) % 0.2455 N 
+mean(abs(FSPullForce-0.75)) % 0.3212 N
+mean(abs(GTPullForce-0.75)) % 0.0255 N
+
+% variances: GT 0.0014, FS 0.0059 (4x > than GT), VS 0.0911 (65x > than GT)
+% All variances are statistically significantly different than one another
+% easily - though we don't account for "family-wise error rate", p values
+% are small so there shouldn't be a problem
+p=vartestn([VSPullForce;FSPullForce],[ones(size(VSPullForce));zeros(size(FSPullForce))],'TestType','BrownForsythe','display','off')  %p<5e-12
+p=vartestn([VSPullForce;GTPullForce],[ones(size(VSPullForce));zeros(size(GTPullForce))],'TestType','BrownForsythe','display','off')  %p<3e-16
+p=vartestn([FSPullForce;GTPullForce],[ones(size(FSPullForce));zeros(size(GTPullForce))],'TestType','BrownForsythe','display','off')  %p<8e-7
+
 
