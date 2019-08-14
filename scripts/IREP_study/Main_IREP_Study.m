@@ -35,7 +35,7 @@ VSForce=[arteryMetrics(:,1).forceMeanAppliedVert]';
 FSForce=[arteryMetrics(:,2).forceMeanAppliedVert]';
 GTForce=[arteryMetrics(:,3).forceMeanAppliedVert]';
 figure
-myBoxPlot({VSForce,FSForce,GTForce,output2.meanAppliedVerticalForce},{'Unaided','Estimated FB','Sensor FB','Automated'},1)
+myBoxPlot({VSForce,FSForce,GTForce},{'Unaided','Estimated FB','Sensor FB'},1)
 hHandle=hline(0.75,'r--');
 prettyFigure
 title('Palpation Forces')
@@ -90,7 +90,7 @@ forceCategory = [repmat({'Unaided'},length(VSForce),1);
 figure
 [p,tbl,stats]=anova1(forceVec,forceCategory,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValForcce = c(:,end)
+pValForcce = c(:,end) %p>0.32
 title('Palpation Forces')
 
 % Brown forsyth test shows significance FS and GT, VS and GT, not VS and FS
@@ -104,9 +104,9 @@ var(FSForce) % 0.03
 var(GTForce) % 0.0125
 
 % Mean errors
-mean(0.75-VSForce) %0.14
-mean(0.75-FSForce) %0.12
-mean(0.75-GTForce) %0.18
+mean(0.75-VSForce) %0.15
+mean(0.75-FSForce) %0.13
+mean(0.75-GTForce) %0.19
 
 % Mean force applied
 mean(VSForce) % 0.60
@@ -147,7 +147,7 @@ pullCategory = [repmat({'Unaided'},length(VSPullForce),1);
 figure
 [p,tbl,stats]=anova1(pullVec,pullCategory,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValPull = c(:,end)
+pValPull = c(:,end) %p< 0.0007
 title('String Pull Forces')
 % All groups are statistically significantly different, but the unaided has
 % a better mean pulling force than pulling with the sensed force
@@ -183,7 +183,7 @@ palpTLXCat = [repmat({'FS'},length(effort_Palpation_FS),1);
 figure
 [p,tbl,stats]=anova1(palpTLXVec,palpTLXCat,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValPalpTLX = c(:,end) % 0.
+pValPalpTLX = c(:,end) % p>0.43
 title('Palpation Effort')
 mean(effort_Palpation_FS) %10.63
 mean(effort_Palpation_GT) % 8.5
@@ -199,7 +199,7 @@ stringTLXCat = [repmat({'FS'},length(effort_String_FS),1);
 figure
 [p,tbl,stats]=anova1(stringTLXVec,stringTLXCat,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValStringTLX = c(:,end) %0.46,0.02,0.001
+pValStringTLX = c(:,end) %0.46,0.02,0.002
 title('String Effort')
 mean(effort_String_FS) % 5.25
 mean(effort_String_GT) % 1.88
@@ -222,16 +222,15 @@ output2 = processArteryIREP_fDat(fDat2,arteryPoints,plotOption);
 
 
 %%
-forceVec=[VSForce;FSForce;GTForce;output2.meanAppliedVerticalForce'];
+forceVec=[VSForce;FSForce;GTForce];
 forceCategory = [repmat({'Unaided'},length(VSForce),1);
                     repmat({'Estimated'},length(FSForce),1);
-                    repmat({'Sensor'},length(GTForce),1);
-                    repmat({'Auto'},length(output2.meanAppliedVerticalForce)*2,1)];
+                    repmat({'Sensor'},length(GTForce),1)];
 
 figure
 [p,tbl,stats]=anova1(forceVec,forceCategory,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValForcce = c(:,end)
+pValForcce = c(:,end) %p>0.3165
 title('Ablation Forces')
 
 % Brown forsyth test shows significance FS and GT, VS and GT, not VS and FS
@@ -243,19 +242,19 @@ p=vartestn([FSForce;GTForce],[ones(size(FSForce));zeros(size(GTForce))],'TestTyp
 var(VSForce) % 0.05
 var(FSForce) % 0.03
 var(GTForce) % 0.0125
-var(output2.meanAppliedVerticalForce) % 0.0019
+var(output2.meanAppliedVerticalForce) % 0.0014
 
 % Mean errors
-mean(0.75-VSForce) %0.14
-mean(0.75-FSForce) %0.12
-mean(0.75-GTForce) %0.18
-mean(0.75-output2.meanAppliedVerticalForce) % 0.0082
+mean(0.75-VSForce) %0.15
+mean(0.75-FSForce) %0.13
+mean(0.75-GTForce) %0.19
+mean(0.75-output2.meanAppliedVerticalForce) % 0.081
 
 % Mean force applied
 mean(VSForce) % 0.60
 mean(FSForce) % 0.62 - slightly better than GT!
 mean(GTForce) % 0.56
-mean(output2.meanAppliedVerticalForce) % 0.74
+mean(output2.meanAppliedVerticalForce) % 0.67
 
 %%
 ablateB0=getExperimentFScope('Intrinsic20190813MagAblateB0');
@@ -264,4 +263,34 @@ ablateB0Output = processArteryIREP_fDat(ablateB0,arteryPoints,plotOption);
 % 
 ablateB1Output = processArteryIREP_fDat(ablateB1,arteryPoints,plotOption);
 
+ablateB1Output
 
+
+
+%% Redo box plots and t tests with automated ablation
+myBoxPlot({VSForce,FSForce,GTForce,ablateB1Output.meanAppliedVerticalForce},{'Unaided','JEXSIS FB','Sensor FB','Automated'},1)
+hHandle=hline(0.75,'r--');
+prettyFigure
+set(hHandle,'LineWidth',3)
+title('Palpation Forces')
+ylabel('Vertical Force Applied (N)')
+legend(hHandle,'Desired Force Level')
+saveFigPDF('StudyPalpationForcesAuto.pdf')
+
+% Variance is significantly lower
+forceAutoVec=[VSForce',FSForce',GTForce',ablateB1Output.meanAppliedVerticalForce];
+forceAutoCat = [repmat({'Unaided'},length(VSForce),1);
+          repmat({'Sensed'},length(FSForce),1);
+          repmat({'Ground Truth'},length(GTForce),1);
+          repmat({'Automated'},length(ablateB1Output.meanAppliedVerticalForce),1)];
+[p,tbl,stats]=anova1(forceAutoVec,forceAutoCat,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+
+var(GTForce)
+
+var(ablateB1Output.meanAppliedVerticalForce)
+
+% Variance is significantly lower
+p=vartestn([VSForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(VSForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=6.5e-7
+p=vartestn([FSForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(FSForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=8.8e-6
+p=vartestn([GTForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(GTForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=3.5e-7
