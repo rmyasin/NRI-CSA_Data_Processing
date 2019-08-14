@@ -211,13 +211,6 @@ plot([4.5,4.5],y,'k','linewidth',4)
 title(['Perceived User Effort' newline])
 text(2,30,'Ablation','FontSize',32,'Color','r','FontAngle','oblique')
 text(5,30,'Palpation','FontSize',32,'Color','r','FontAngle','oblique')
-%  set(title_handle,); %modify the font size of the title
-%  set(title_handle); %modify the font size of the title
-%  set(title_handle); %modify the font style to forward slanted
+plot(3.75,3.25,'kp','MarkerSize',15,'MarkerFaceColor','k')
+plot(5.75,8.35,'kp','MarkerSize',15,'MarkerFaceColor','k')
 
-%  
-% figure
-% myBoxPlot(timeCell,expNames)
-% title('Experiment Time')
-% ylabel('Completion Time (s)')
-% prettyFigure

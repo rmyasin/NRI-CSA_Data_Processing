@@ -36,8 +36,6 @@ function metrics=processArteryIREP(output,arteryInMag,plotOption)
     [curContact,curTimes]=trimBetweenTime(cur.data,cur.time,contactTrimTimes);
     
     %% Find organ data
-
-    
     timeTrim=[];
     for status=[1:2:9]
         lastIndex=find(output.artery_status.data==status,1,'last');
@@ -58,7 +56,6 @@ function metrics=processArteryIREP(output,arteryInMag,plotOption)
         distance=pdist2(arteryInMag',curTrimContact{jj},'euclidean','Smallest',1);
         meanDistError(jj)=mean(distance);
     end
-
     
     % Metric 2: how much of the curve is "covered" (closest point) *during* contact.
     % If the user leaves the organ, we will see a lack of coverage (or if
@@ -69,17 +66,8 @@ function metrics=processArteryIREP(output,arteryInMag,plotOption)
     end
     
     %% Find force folowing errors
-    % Don't include when not in contact, don't need to follow forces then
-%     forceNorm=rowNorm(force.data);
-%     forceNormTrim=trimBetweenTime(forceNorm,force.time,timeTrim,true);
-%     for jj=1:3
-%         forceNormInContact=forceNormTrim{jj}(forceNormTrim{jj}>0.15);
-%         forceError(jj)=rms(forceNormInContact-0.5);
-%     end
-    
     % Calculate y force errors
     forceTrimTrue = trimBetweenTime(force_gt.data,force_gt.time,timeTrim,true);
-%     forceTrimEst = trimBetweenTime(forceEst.data,forceEst.time,timeTrim,true);
     fDesired = 0.75; % Desired force is -0.75 N in Y direction
     for jj=1:5 %each individual trial
         forceMeanAppliedNorm(jj)=rms(rowNorm(forceTrimTrue{jj}));
@@ -89,7 +77,6 @@ function metrics=processArteryIREP(output,arteryInMag,plotOption)
     end
     
     %% Set up metrics struct
-    
     forceGTInterp=interp1(output.force_gt.time,output.force_gt.data,forceEst.time);    
     estimationErrorList = (forceEst.data-forceGTInterp);
     forceEstimationError=trimBetweenTime(estimationErrorList,output.force_gt.time,timeTrim,true);

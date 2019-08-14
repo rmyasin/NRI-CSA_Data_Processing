@@ -16,14 +16,14 @@ saveFigPDF([figoutput filesep 'Path_Time_Bar'],4);
 load('palpationMetrics')
 plotPalpationStatistics(palpationMetrics)
 
-% saveFigPDF([figoutput filesep 'Palp_Found'],9);
-% saveFigPDF([figoutput filesep 'Palp_Extra'],10);
-% saveFigPDF([figoutput filesep 'Palp_Distance_Bar'],11);
-% saveFigPDF([figoutput filesep 'Palp_Time_Bar'],12);
+saveFigPDF([figoutput filesep 'Palp_Found'],9);
+saveFigPDF([figoutput filesep 'Palp_Extra'],10);
+saveFigPDF([figoutput filesep 'Palp_Distance_Bar'],11);
+saveFigPDF([figoutput filesep 'Palp_Time_Bar'],12);
 
 
 Effort
-% saveFigPDF([figoutput filesep 'User_Effort'],16);
+saveFigPDF([figoutput filesep 'User_Effort'],17);
 
 
 %% Output answers

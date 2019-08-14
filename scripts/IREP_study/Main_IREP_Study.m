@@ -3,6 +3,7 @@ close all
 clc
 
 addpath('R:\Projects\NRI\User_Study\Data_Processing.git\scripts\Utilities')
+addpath('R:\Robots\irep.git\SnakeForceSensing\Utilities\');
 addpath(genpath(getenv('ARMA_CL')))
 saveData=false;
 
@@ -16,7 +17,7 @@ userList=1:8;
 arteryData=getIREPArteryData(dataFolder,userList,saveData);
 
 %% Get Ablation metrics
-plotOption=false;
+plotOption=true;
 
 % FS Feedback
 for ii=1:length(userList)
@@ -29,12 +30,12 @@ for ii=1:length(userList)
     end
 end
 
-%%Boxplot of forces
+% Boxplot of forces
 VSForce=[arteryMetrics(:,1).forceMeanAppliedVert]';
 FSForce=[arteryMetrics(:,2).forceMeanAppliedVert]';
 GTForce=[arteryMetrics(:,3).forceMeanAppliedVert]';
 figure
-myBoxPlot({VSForce,FSForce,GTForce},{'Unaided','Estimated Feedback','True Feedback'},1)
+myBoxPlot({VSForce,FSForce,GTForce,output2.meanAppliedVerticalForce},{'Unaided','Estimated FB','Sensor FB','Automated'},1)
 hHandle=hline(0.75,'r--');
 prettyFigure
 title('Palpation Forces')
@@ -43,11 +44,12 @@ legend(hHandle,'Desired Force Level')
 prettyFigure
 saveFigPDF('StudyPalpationForces.pdf')
 
-%%Distance from center
+% Distance from center
 VSDist=[arteryMetrics(:,1).meanDistance]';
 FSDist=[arteryMetrics(:,2).meanDistance]';
 GTDist=[arteryMetrics(:,3).meanDistance]';
 
+% Boxplot and statistics of distance to line
 figure
 myBoxPlot({VSDist,FSDist,GTDist},{'Unaided','Estimated Feedback','True Feedback'})
 prettyFigure
@@ -78,8 +80,8 @@ var(VSDist) %3.5274
 var(FSDist) %2.7671
 var(GTDist) %1.7311
 
-%%Tukey cramer test of means - no statistically significant difference
-%%between *any* of the forces
+% Tukey cramer test of means - no statistically significant difference
+% between *any* of the forces
 forceVec=[VSForce;FSForce;GTForce];
 forceCategory = [repmat({'Unaided'},length(VSForce),1);
                     repmat({'Sensed'},length(FSForce),1);
@@ -101,15 +103,15 @@ var(VSForce) % 0.05
 var(FSForce) % 0.03
 var(GTForce) % 0.0125
 
-% % Mean errors
+% Mean errors
 mean(0.75-VSForce) %0.14
 mean(0.75-FSForce) %0.12
 mean(0.75-GTForce) %0.18
 
 % Mean force applied
 mean(VSForce) % 0.60
-mean(FSForce) %0.62 - slightly better than GT!
-mean(GTForce) %0.56
+mean(FSForce) % 0.62 - slightly better than GT!
+mean(GTForce) % 0.56
 
 %% Get String data
 [stringData,trainingData]=getIREPStringData(dataFolder,userList,saveData);
@@ -117,7 +119,6 @@ plotOption=false;
 for ii=1:size(stringData,1)
     userNumber=userList(ii);
     desiredForce=0.75;
-
     for jj=1:size(stringData,2)
         stringMetrics(ii,jj) = processStringIREP(stringData{ii,jj},desiredForce,plotOption);
     end
@@ -142,6 +143,7 @@ pullCategory = [repmat({'Unaided'},length(VSPullForce),1);
                     repmat({'Sensed'},length(FSPullForce),1);
                     repmat({'Ground Truth'},length(GTPullForce),1)];
 
+% Plot Forces
 figure
 [p,tbl,stats]=anova1(pullVec,pullCategory,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
@@ -166,5 +168,100 @@ mean(abs(GTPullForce-0.75)) % 0.0255 N
 p=vartestn([VSPullForce;FSPullForce],[ones(size(VSPullForce));zeros(size(FSPullForce))],'TestType','BrownForsythe','display','off')  %p<5e-12
 p=vartestn([VSPullForce;GTPullForce],[ones(size(VSPullForce));zeros(size(GTPullForce))],'TestType','BrownForsythe','display','off')  %p<3e-16
 p=vartestn([FSPullForce;GTPullForce],[ones(size(FSPullForce));zeros(size(GTPullForce))],'TestType','BrownForsythe','display','off')  %p<8e-7
+
+
+
+%% 
+effort_IREP_study
+
+% No significant difference in palpation effort
+palpTLXVec=[effort_Palpation_FS;effort_Palpation_GT;effort_Palpation_U];
+palpTLXCat = [repmat({'FS'},length(effort_Palpation_FS),1);
+              repmat({'GT'},length(effort_Palpation_GT),1);
+              repmat({'U'},length(effort_Palpation_U),1)];
+
+figure
+[p,tbl,stats]=anova1(palpTLXVec,palpTLXCat,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValPalpTLX = c(:,end) % 0.
+title('Palpation Effort')
+mean(effort_Palpation_FS) %10.63
+mean(effort_Palpation_GT) % 8.5
+mean(effort_Palpation_U) % 12.88
+
+% String Effort - unaided is significantly more difficult than the other
+% tasks
+stringTLXVec= [effort_String_FS;effort_String_GT;effort_String_U];
+stringTLXCat = [repmat({'FS'},length(effort_String_FS),1);
+                repmat({'GT'},length(effort_String_GT),1);
+                repmat({'U'},length(effort_String_U),1)];
+
+figure
+[p,tbl,stats]=anova1(stringTLXVec,stringTLXCat,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValStringTLX = c(:,end) %0.46,0.02,0.001
+title('String Effort')
+mean(effort_String_FS) % 5.25
+mean(effort_String_GT) % 1.88
+mean(effort_String_U) % 13.25
+
+
+
+
+%%
+ablateAuto={
+    'Intrinsic20190812AblateBeta0Repeat'
+    'Intrinsic20190812AblateBeta1Repeat'
+    };
+fDat1= getExperimentFScope(ablateAuto{1});
+fDat2= getExperimentFScope(ablateAuto{2});
+
+plotOption=true;
+output = processArteryIREP_fDat(fDat1,arteryPoints,plotOption);
+output2 = processArteryIREP_fDat(fDat2,arteryPoints,plotOption);
+
+
+%%
+forceVec=[VSForce;FSForce;GTForce;output2.meanAppliedVerticalForce'];
+forceCategory = [repmat({'Unaided'},length(VSForce),1);
+                    repmat({'Estimated'},length(FSForce),1);
+                    repmat({'Sensor'},length(GTForce),1);
+                    repmat({'Auto'},length(output2.meanAppliedVerticalForce)*2,1)];
+
+figure
+[p,tbl,stats]=anova1(forceVec,forceCategory,'off');
+c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
+pValForcce = c(:,end)
+title('Ablation Forces')
+
+% Brown forsyth test shows significance FS and GT, VS and GT, not VS and FS
+p=vartestn([VSForce;FSForce],[ones(size(VSForce));zeros(size(FSForce))],'TestType','BrownForsythe','display','off')  %p=0.12
+p=vartestn([VSForce;GTForce],[ones(size(VSForce));zeros(size(GTForce))],'TestType','BrownForsythe','display','off')  %p=0.0003
+p=vartestn([FSForce;GTForce],[ones(size(FSForce));zeros(size(GTForce))],'TestType','BrownForsythe','display','off')  %p=0.034
+
+% Variances of different groups
+var(VSForce) % 0.05
+var(FSForce) % 0.03
+var(GTForce) % 0.0125
+var(output2.meanAppliedVerticalForce) % 0.0019
+
+% Mean errors
+mean(0.75-VSForce) %0.14
+mean(0.75-FSForce) %0.12
+mean(0.75-GTForce) %0.18
+mean(0.75-output2.meanAppliedVerticalForce) % 0.0082
+
+% Mean force applied
+mean(VSForce) % 0.60
+mean(FSForce) % 0.62 - slightly better than GT!
+mean(GTForce) % 0.56
+mean(output2.meanAppliedVerticalForce) % 0.74
+
+%%
+ablateB0=getExperimentFScope('Intrinsic20190813MagAblateB0');
+ablateB1=getExperimentFScope('Intrinsic20190813MagAblateB1');
+ablateB0Output = processArteryIREP_fDat(ablateB0,arteryPoints,plotOption);
+% 
+ablateB1Output = processArteryIREP_fDat(ablateB1,arteryPoints,plotOption);
 
 
