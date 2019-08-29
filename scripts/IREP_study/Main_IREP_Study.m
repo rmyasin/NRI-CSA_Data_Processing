@@ -6,6 +6,7 @@ addpath('R:\Projects\NRI\User_Study\Data_Processing.git\scripts\Utilities')
 addpath('R:\Robots\irep.git\SnakeForceSensing\Utilities\');
 addpath(genpath(getenv('ARMA_CL')))
 saveData=false;
+processData=false;
 
 %% Ground truth data
 dataFolder = 'R:\Projects\NRI\User_Study\Data\IREP\GT';
@@ -17,17 +18,22 @@ userList=1:8;
 arteryData=getIREPArteryData(dataFolder,userList,saveData);
 
 %% Get Ablation metrics
-plotOption=true;
+plotOption=false;
 
 % FS Feedback
-for ii=1:length(userList)
-    userNumber=userList(ii);
-    for jj=1:3
-        if arteryData{ii,jj}.pathType ~= jj
-            warning('Bad Data at %d, %d',ii,jj)
+if processData
+    for ii=1:length(userList)
+        userNumber=userList(ii);
+        for jj=1:3
+            if arteryData{ii,jj}.pathType ~= jj
+                warning('Bad Data at %d, %d',ii,jj)
+            end
+            arteryMetrics(ii,jj)=processArteryIREP(arteryData{ii,jj},arteryPoints,plotOption);
         end
-        arteryMetrics(ii,jj)=processArteryIREP(arteryData{ii,jj},arteryPoints,plotOption);
     end
+    save('arteryMetrics','arteryMetrics')
+else
+    load('arteryMetrics')
 end
 
 % Boxplot of forces
@@ -60,13 +66,13 @@ saveFigPDF('StudyPalpationDistance.pdf')
 
 distVec=[VSDist;FSDist;GTDist];
 distCat = [repmat({'Unaided'},length(VSDist),1);
-          repmat({'Sensed'},length(FSDist),1);
-          repmat({'Ground Truth'},length(GTDist),1)];
+    repmat({'Sensed'},length(FSDist),1);
+    repmat({'Ground Truth'},length(GTDist),1)];
 [p,tbl,stats]=anova1(distVec,distCat,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
-pValDist = c(:,end) 
-%1,2: 0.3107 
-%1,3: 0.1212 
+pValDist = c(:,end)
+%1,2: 0.3107
+%1,3: 0.1212
 %2,3: 0.8641
 mean(VSDist) %4.99 mm
 mean(FSDist) %4.46 mm
@@ -84,8 +90,8 @@ var(GTDist) %1.7311
 % between *any* of the forces
 forceVec=[VSForce;FSForce;GTForce];
 forceCategory = [repmat({'Unaided'},length(VSForce),1);
-                    repmat({'Sensed'},length(FSForce),1);
-                    repmat({'Ground Truth'},length(GTForce),1)];
+    repmat({'Sensed'},length(FSForce),1);
+    repmat({'Ground Truth'},length(GTForce),1)];
 
 figure
 [p,tbl,stats]=anova1(forceVec,forceCategory,'off');
@@ -116,12 +122,17 @@ mean(GTForce) % 0.56
 %% Get String data
 [stringData,trainingData]=getIREPStringData(dataFolder,userList,saveData);
 plotOption=false;
-for ii=1:size(stringData,1)
-    userNumber=userList(ii);
-    desiredForce=0.75;
-    for jj=1:size(stringData,2)
-        stringMetrics(ii,jj) = processStringIREP(stringData{ii,jj},desiredForce,plotOption);
+if processData
+    for ii=1:size(stringData,1)
+        userNumber=userList(ii);
+        desiredForce=0.75;
+        for jj=1:size(stringData,2)
+            stringMetrics(ii,jj) = processStringIREP(stringData{ii,jj},desiredForce,plotOption);
+        end
+        save('stringMetrics','stringMetrics')
     end
+else
+    load('stringMetrics')
 end
 
 VSPullForce = rowNorm(vertcat(stringMetrics(:,1).stringPullForce));
@@ -140,8 +151,8 @@ saveFigPDF('StudyPullingForces.pdf')
 
 pullVec=[VSPullForce;FSPullForce;GTPullForce];
 pullCategory = [repmat({'Unaided'},length(VSPullForce),1);
-                    repmat({'Sensed'},length(FSPullForce),1);
-                    repmat({'Ground Truth'},length(GTPullForce),1)];
+    repmat({'Sensed'},length(FSPullForce),1);
+    repmat({'Ground Truth'},length(GTPullForce),1)];
 
 % Plot Forces
 figure
@@ -157,7 +168,7 @@ mean(GTPullForce) % 0.759
 
 % Mean Error (t test says significantly different, which you'd expect since
 % the mean pulling force is different)
-mean(abs(VSPullForce-0.75)) % 0.2455 N 
+mean(abs(VSPullForce-0.75)) % 0.2455 N
 mean(abs(FSPullForce-0.75)) % 0.3212 N
 mean(abs(GTPullForce-0.75)) % 0.0255 N
 
@@ -171,14 +182,14 @@ p=vartestn([FSPullForce;GTPullForce],[ones(size(FSPullForce));zeros(size(GTPullF
 
 
 
-%% 
+%%
 effort_IREP_study
 
 % No significant difference in palpation effort
 palpTLXVec=[effort_Palpation_FS;effort_Palpation_GT;effort_Palpation_U];
 palpTLXCat = [repmat({'FS'},length(effort_Palpation_FS),1);
-              repmat({'GT'},length(effort_Palpation_GT),1);
-              repmat({'U'},length(effort_Palpation_U),1)];
+    repmat({'GT'},length(effort_Palpation_GT),1);
+    repmat({'U'},length(effort_Palpation_U),1)];
 
 figure
 [p,tbl,stats]=anova1(palpTLXVec,palpTLXCat,'off');
@@ -193,8 +204,8 @@ mean(effort_Palpation_U) % 12.88
 % tasks
 stringTLXVec= [effort_String_FS;effort_String_GT;effort_String_U];
 stringTLXCat = [repmat({'FS'},length(effort_String_FS),1);
-                repmat({'GT'},length(effort_String_GT),1);
-                repmat({'U'},length(effort_String_U),1)];
+    repmat({'GT'},length(effort_String_GT),1);
+    repmat({'U'},length(effort_String_U),1)];
 
 figure
 [p,tbl,stats]=anova1(stringTLXVec,stringTLXCat,'off');
@@ -224,8 +235,8 @@ output2 = processArteryIREP_fDat(fDat2,arteryPoints,plotOption);
 %%
 forceVec=[VSForce;FSForce;GTForce];
 forceCategory = [repmat({'Unaided'},length(VSForce),1);
-                    repmat({'Estimated'},length(FSForce),1);
-                    repmat({'Sensor'},length(GTForce),1)];
+    repmat({'Estimated'},length(FSForce),1);
+    repmat({'Sensor'},length(GTForce),1)];
 
 figure
 [p,tbl,stats]=anova1(forceVec,forceCategory,'off');
@@ -260,7 +271,7 @@ mean(output2.meanAppliedVerticalForce) % 0.67
 ablateB0=getExperimentFScope('Intrinsic20190813MagAblateB0');
 ablateB1=getExperimentFScope('Intrinsic20190813MagAblateB1');
 ablateB0Output = processArteryIREP_fDat(ablateB0,arteryPoints,plotOption);
-% 
+%
 ablateB1Output = processArteryIREP_fDat(ablateB1,arteryPoints,plotOption);
 
 ablateB1Output
@@ -280,9 +291,9 @@ saveFigPDF('StudyPalpationForcesAuto.pdf')
 % Variance is significantly lower
 forceAutoVec=[VSForce',FSForce',GTForce',ablateB1Output.meanAppliedVerticalForce];
 forceAutoCat = [repmat({'Unaided'},length(VSForce),1);
-          repmat({'Sensed'},length(FSForce),1);
-          repmat({'Ground Truth'},length(GTForce),1);
-          repmat({'Automated'},length(ablateB1Output.meanAppliedVerticalForce),1)];
+    repmat({'Sensed'},length(FSForce),1);
+    repmat({'Ground Truth'},length(GTForce),1);
+    repmat({'Automated'},length(ablateB1Output.meanAppliedVerticalForce),1)];
 [p,tbl,stats]=anova1(forceAutoVec,forceAutoCat,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');
 
@@ -294,3 +305,5 @@ var(ablateB1Output.meanAppliedVerticalForce)
 p=vartestn([VSForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(VSForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=6.5e-7
 p=vartestn([FSForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(FSForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=8.8e-6
 p=vartestn([GTForce;ablateB1Output.meanAppliedVerticalForce'],[ones(size(GTForce));zeros(size(ablateB1Output.meanAppliedVerticalForce'))],'TestType','BrownForsythe','display','off')  %p=3.5e-7
+
+save('allIREPData')

@@ -18,7 +18,7 @@ plotPalpationStatistics(palpationMetrics)
 
 saveFigPDF([figoutput filesep 'Palp_Found'],9);
 saveFigPDF([figoutput filesep 'Palp_Extra'],10);
-saveFigPDF([figoutput filesep 'Palp_Distance_Bar'],11);
+saveFigPDF([figoutput filesep 'Palp_Feature_Bar'],11);
 saveFigPDF([figoutput filesep 'Palp_Time_Bar'],12);
 
 

@@ -60,7 +60,7 @@ tmp=[palpationMetrics(:,2).centerDistances];
 distanceGPCenter=vertcat(tmp{:});
 distanceCenterCell={distanceHapticCenter,distanceGPCenter};
 %% Plot Artery Results
-expNames={'Haptic','Visual GP'};
+expNames={'Force FB','Visual FB'};
 % 
 % figure
 % myBoxPlot(foundCell,expNames)
@@ -89,17 +89,36 @@ ylabel('Number Additional Selected')
 yticks(0:max([extraCellCenter{:}]))
 prettyFigure
 
-% figure
-% myBoxPlot(closeCell,expNames)
-% title('Distance Surf')
-% ylabel('Distance to Points (s)')
-% prettyFigure
+%%
+fig = figure;
+left_color = [0 0 0];
+right_color = [0 0 0];
+set(fig,'defaultAxesColorOrder',[left_color; right_color]);
 
-figure
-myBoxPlot(closeCellCenter,expNames)
-title('Distance from Ground Truth')
-ylabel('Distance to Points (mm)')
+myBoxPlot([foundCellCenter,extraCellCenter{1}/10,extraCellCenter{2}/10],[expNames expNames])
 prettyFigure
+ylim([-0.1 1.1])
+y=get(gca,'ylim');
+hold on
+plot([2.5,2.5],y,'k','linewidth',4)
+ylabel('Percent Found')
+yyaxis right
+ylim([-1 11])
+title(['Palpation Performance' newline])
+hYLabel=ylabel('Number Selected','Color','k');
+% hYLabel = get(gca,'YLabel');
+set(hYLabel,'rotation',90,'VerticalAlignment','middle')
+text(1,11.65,'Features Found','FontSize',32,'Color','r','FontAngle','oblique')
+text(3,11.65,'Excess Features','FontSize',32,'Color','r','FontAngle','oblique')
+
+
+
+%%
+% figure
+% myBoxPlot(closeCellCenter,expNames)
+% title('Distance from Ground Truth')
+% ylabel('Distance to Points (mm)')
+% prettyFigure
 
 figure
 myBoxPlot(timeCell,expNames)

@@ -185,8 +185,8 @@ pValAblation = c(:,end)
 
 palpationVec=[Effort_Palpation1;Effort_Palpation2];
 palpationCell={Effort_Palpation1,Effort_Palpation2};
-palpationCategory = [repmat({['Haptic']},length(palpationCell{1}),1);
-                    repmat({['Visual']},length(palpationCell{2}),1)];
+palpationCategory = [repmat({['Force FB']},length(palpationCell{1}),1);
+                    repmat({['Visual FB']},length(palpationCell{2}),1)];
 % figure
 % myBoxPlot(palpationCell,palpationCategory)
 % title('Perceived User Palpation Effort')
@@ -213,4 +213,12 @@ text(2,30,'Ablation','FontSize',32,'Color','r','FontAngle','oblique')
 text(5,30,'Palpation','FontSize',32,'Color','r','FontAngle','oblique')
 plot(3.75,3.25,'kp','MarkerSize',15,'MarkerFaceColor','k')
 plot(5.75,8.35,'kp','MarkerSize',15,'MarkerFaceColor','k')
+
+
+% mean(palpationCell{1})%    18.3462
+% mean(palpationCell{2})%    13.2800
+% mean(ablationCell{1})%    17.4615
+% mean(ablationCell{2})%    14.5769
+% mean(ablationCell{3})%    14.3846
+% mean(ablationCell{4})%     9.3846
 
