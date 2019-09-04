@@ -1,3 +1,26 @@
+% Takes saved data from SaveExperimentData() and calculates metrics for NRI
+% user study of "palpation" to find subsurface features
+% % Inputs:
+% dataFolder - folder of experiment data
+% ii - index of which experiment to process
+% expOrgan - label of organ used in this experiment
+% regTimes - most recent registration time
+% regNames - list of registration files in data folder
+% plotOption - whether or not to plot
+% userNumber - which user is performing the experiment
+% % Outputs:
+% metrics - metrics of user performance
+    % completionTime - time to complete one palpation experiment
+    % distanceList - list of distances from selected features to points
+    % centerDistances - list of distances from selected features to centers
+    % spheresFound - number of spheres found
+    % spheresFoundCenter - number of spheres found using center distance
+    % spheresTotal - total number of spheres in this organ
+    % extraSelect - excess features 'found' 
+    % extraSelectCenter - excess features 'found' using center distance
+    % closeDist - distance of found features
+    % closeDistCenter - distance of found features using center distance
+
 function metrics = processPalpationExperiment(dataFolder,ii,expOrgan,regTimes,regNames,plotOption,userNumber)
 cpd_dir=getenv('CPDREG');
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];

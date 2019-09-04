@@ -1,25 +1,21 @@
+clear
+close all
+% clc
+
 organ_reg_pts;
+organLabel='A';
 x=organFids0;
-[rob,mic]=readPSMRegPts('.','PSMRegPtsVU.txt')
+[rob,mic]=readPSMRegPts('.','PSMRegPtsVU.txt');
 
 y=[mean(rob.pos{1})', mean(rob.pos{2})', mean(rob.pos{3})' , mean(rob.pos{4})'];
+yMicron=[mean(mic.pos{1})', mean(mic.pos{2})', mean(mic.pos{3})' , mean(mic.pos{4})'];
 
 [R,t]=rigidPointRegistration(x,y);
-FLE = mean(colNorm(y-(R*x+t))) %in meters
+FLE = mean(colNorm(y-(R*x+t))); %in meters
 
+[R2,t2]=rigidPointRegistration(x,yMicron);
+FLE_micron = mean(colNorm(yMicron-(R2*x+t2))); %in meters
 
-% TRE calculation along artery
-[TRE_RMS,F1,F2,F3] = treapprox(X,T,RMS_FLE)
-
-%Get some artery points
-[arteryInRobot,HOrgan] = getArteryPoints([dataFolder filesep regFolder],organLabel,featureFolder);
-
-
-%% getArteryPoints
-%% Kidney_A_Artery, Kidney_C_Artery, Kidney_D_Artery (0,2,3)
-organLabel='A';
-organLabel='C';
-organLabel='D';
 
 cpd_dir=getenv('CPDREG');
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
@@ -30,10 +26,14 @@ temp=load([featureFolder filesep 'Kidney_' organLabel '_Artery_Pts.mat']);
 arteryPointsRaw=temp.ptOutput;
 clear('temp');
 
-registrationFilePath = [regFolder filesep 'PSM2Phantom' num2str(label2num(organLabel)) '.txt'];
-HOrgan=readTxtReg(registrationFilePath);
+vplot3(x')
+hold on
+vplot3(arteryPointsRaw')
 
-arteryHomog=[arteryPointsRaw;ones(1,size(arteryPointsRaw,2))];
-arteryReg=HOrgan*arteryHomog;
-arteryInRobot=arteryReg(1:3,:)';
+%%
+% TRE calculation along artery
+TRE_RMS = mean(treapprox(x,arteryPointsRaw,FLE))
 
+TRE_RMS_Micron = mean(treapprox(x,arteryPointsRaw,FLE_micron))
+
+% Mean TRE is 2mm with robot, 0.4 mm with micron

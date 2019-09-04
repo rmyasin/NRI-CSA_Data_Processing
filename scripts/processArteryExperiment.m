@@ -1,17 +1,22 @@
 % Takes saved data from SaveExperimentData() and calculates metrics for NRI
 % user study of "ablation" along a path
 % % Inputs:
-% dataFolder - 
-% expIndex - 
-% expOrgan - 
-% regTimes - 
-% regNames - 
-% plotOption -
+% dataFolder - folder of experiment data
+% expIndex - index of which experiment to process
+% expOrgan - label of organ used in this experiment
+% regTimes - most recent registration time
+% regNames - list of registration files in data folder
+% plotOption - whether or not to plot
 % % Outputs:
-% metrics - 
+% metrics - metrics of user performance
+%   coverage - amount of path covered
+%   meanDistance - mean distance to path
+%   meanProjDistance - mean lateral distance to path
+%   forceError - force regulation error
+%   completionTime - average path completion time
 
-function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,regNames,plotOption,useMicron,userNumber)
-if nargin<7
+function metrics=processArteryExperiment(dataFolder,expIndex,expOrgan,regTimes,regNames,plotOption,userNumber,useMicron)
+if nargin<8
     useMicron=false;
 end
     %% Pick out the right experiment number and organ number
@@ -71,6 +76,7 @@ end
         end
     end
     
+    % Exceptions for data with improper 'cam' button press times
     if userNumber==10 && ii==4
         timeTrim(5)=timeTrim(4)+10;
     elseif userNumber==18 && ii==1
@@ -81,8 +87,7 @@ end
         timeTrim(2)=1.562182579497668e18;
     end
     
-    
-    
+    % Check for errors
     if size(unique(output.artery_status.data))~=size(output.artery_status.data)
         pause;
     end
@@ -94,7 +99,8 @@ end
     if isempty(micronTip.pos)
         micronHomog=[];
         micronContact=[];
-%         warning('No Micron Data')
+        warning('No Micron Data')
+        useMicron=false;
     else
         micronHomog=HOrgan*(HMicron\[micronTip.pos';ones(1,length(micronTip.pos))]);
         micronTrim=trimBetweenTime(micronHomog(1:3,:)',output.micronTip.time,timeTrim,true);
@@ -122,12 +128,6 @@ end
     % 3D errors would correlate with force errors, correlates metrics
     [arteryPlane.n,arteryPlane.p]=fitPlane(arteryInRobot');
     
-%     if plotOption
-%         vplot3(arteryInRobot)
-%         hold on
-%         plotPlane(arteryPlane.n,arteryPlane.p,0.04)
-%     end
-    
     for jj=1:followNumber
         curProj=proj_onto_a_plane(arteryPlane,curTrim{jj});
         distance=pdist2(arteryInRobot,curTrim{jj},'euclidean','Smallest',1);
@@ -135,13 +135,7 @@ end
         
         meanDistError(jj)=mean(distance);
         meanProjDist(jj)=mean(dProj);
-
-%         if plotOption
-%             vplot3(curProj,'.')
-%             hold on
-%         end
     end
-
     
     % Metric 2: how much of the curve is "covered" (closest point) *during* contact.
     % If the user leaves the organ, we will see a lack of coverage (or if
@@ -176,9 +170,6 @@ end
         vplot3(curContact)
         hold on
         vplot3(arteryInRobot)
-        if ~isempty(micronContact)
-%             vplot3(micronContact(:,1:3));
-        end
         vplot3(organInRobot','.')
     end
 end

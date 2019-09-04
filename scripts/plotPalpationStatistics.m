@@ -1,10 +1,5 @@
+% plot boxplots and calculate p values for all palpation experiments
 function plotPalpationStatistics(palpationMetrics)
-
-% for ii=1:2
-%     palpationStatistics.time(ii) = mean([palpationMetrics(:,ii).completionTime]);
-% end
-
-% timeMat=[[palpationMetrics(:,1).completionTime]',[palpationMetrics(:,2).completionTime]'];
 timeVec=[[palpationMetrics(:,1).completionTime]';[palpationMetrics(:,2).completionTime]'];
 timeCategory = [repmat({'Haptic'},length([palpationMetrics(:,1).completionTime]),1);
                     repmat({'Visual'},length([palpationMetrics(:,2).completionTime]),1)];
@@ -44,22 +39,20 @@ distVec=[closeCellCenter{1};closeCellCenter{2}];
 distCategory = [repmat({'Haptic'},length(closeCellCenter{1}),1);
                     repmat({'Visual'},length(closeCellCenter{2}),1)];
 
-
-
-
+% Feature distances
 tmp=[palpationMetrics(:,1).distanceList];
 distanceHaptic=vertcat(tmp{:});
 tmp=[palpationMetrics(:,2).distanceList];
 distanceGP=vertcat(tmp{:});
 distanceCell={distanceHaptic,distanceGP};
 
-
+% Feature center distances
 tmp=[palpationMetrics(:,1).centerDistances];
 distanceHapticCenter=vertcat(tmp{:});
 tmp=[palpationMetrics(:,2).centerDistances];
 distanceGPCenter=vertcat(tmp{:});
 distanceCenterCell={distanceHapticCenter,distanceGPCenter};
-%% Plot Artery Results
+%% Plot Artery Results (boxplots)
 expNames={'Force FB','Visual FB'};
 % 
 % figure
@@ -89,7 +82,6 @@ ylabel('Number Additional Selected')
 yticks(0:max([extraCellCenter{:}]))
 prettyFigure
 
-%%
 fig = figure;
 left_color = [0 0 0];
 right_color = [0 0 0];
@@ -112,14 +104,6 @@ text(1,11.65,'Features Found','FontSize',32,'Color','r','FontAngle','oblique')
 text(3,11.65,'Excess Features','FontSize',32,'Color','r','FontAngle','oblique')
 
 
-
-%%
-% figure
-% myBoxPlot(closeCellCenter,expNames)
-% title('Distance from Ground Truth')
-% ylabel('Distance to Points (mm)')
-% prettyFigure
-
 figure
 myBoxPlot(timeCell,expNames)
 title('Experiment Time')
@@ -140,7 +124,6 @@ prettyFigure
 % prettyFigure
 
 %% ANOVA analysis
-% 
 figure
 [p,tbl,stats]=anova1(timeVec,timeCategory,'off');
 c=multcompare(stats)

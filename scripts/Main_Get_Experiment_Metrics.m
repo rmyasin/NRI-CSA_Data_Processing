@@ -2,6 +2,7 @@ clear
 close all
 clc
 
+
 saveData=false;
 plotOption=false;
 
@@ -18,12 +19,11 @@ userList=[1:16,19:26]; %All data
 % userList=25;
 % load('arteryMetrics')
 
+%% Process txt files to save mat files
 if saveData
     for userNumber=userList %#ok<UNRCH>
-        dataFolder = [baseFolder num2str(userNumber)];
-        % Get information about each user's set of experiments
-        
-        %CMU DATA problems
+        dataFolder = [baseFolder num2str(userNumber)];        
+        % Fix CMU data inconsistencies
         if userNumber==17
             arteryExperiments=[1:2,4];
         elseif userNumber==18
@@ -31,7 +31,8 @@ if saveData
         else
             arteryExperiments=1:4;
         end
-        
+
+        % Get information about each user's set of experiments
         [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
         
         % Process txt files into matlab and save .mat files of experiment info
@@ -39,7 +40,7 @@ if saveData
     end
 end
 
-%% Process experiments
+%% Process experiments, generate performance metricsc
 for userNumber=userList
     dataFolder = [baseFolder num2str(userNumber)];
     % Get information about each user's set of experiments
@@ -65,7 +66,7 @@ for userNumber=userList
     for ii=arteryExperiments
 %             disp(['Data Folder: ' dataFolder]);
 %             disp(['Experiment ' num2str(ii)]);
-            arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii}{1},regTimes,regNames,plotOption,0,userNumber);
+            arteryMetrics(userNumber,ii)=processArteryExperiment(dataFolder,ii,expOrgan{ii}{1},regTimes,regNames,plotOption,userNumber);
     end
     
     %% Process palpation experiments

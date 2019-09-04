@@ -1,3 +1,4 @@
+% Save figures for publication
 clear
 close all
 clc

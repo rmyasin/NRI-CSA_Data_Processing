@@ -1,4 +1,6 @@
+% plot boxplots and calculate p values for all ablation experiments
 function plotArteryStatistics(arteryMetrics)
+% Create vectors and matrices for comparison
 coverageVec=[[arteryMetrics(:,1).coverage]';[arteryMetrics(:,2).coverage]';[arteryMetrics(:,3).coverage]';[arteryMetrics(:,4).coverage]'];
 coverageCategory = [repmat({'Unaided'},length([arteryMetrics(:,1).coverage]),1);
                     repmat({'Visual'},length([arteryMetrics(:,2).coverage]),1);
@@ -27,7 +29,7 @@ timeCategory = [repmat({'Unaided'},length([arteryMetrics(:,1).completionTime]),1
                     repmat({'Auto VF'},length([arteryMetrics(:,4).completionTime]),1)];
 timeCell={[arteryMetrics(:,1).completionTime],[arteryMetrics(:,2).completionTime],[arteryMetrics(:,3).completionTime],[arteryMetrics(:,4).completionTime]};
 
-%% Plot Artery Results
+%% Plot Boxplots of Artery Results
 expNames={'Unaided','Visual','Haptic VF','Auto VF'};
 figure
 myBoxPlot(coverageCell,expNames)
@@ -67,7 +69,7 @@ y=get(gca,'ylim');
 hold on
 plot([3.5,3.5],y,'k','linewidth',4)
 
-%% ANOVA analysis
+%% ANOVA/Tukey statistical analysis
 figure
 [p,tbl,stats]=anova1(coverageVec,coverageCategory,'off');
 c=multcompare(stats,'Alpha',0.05,'CType','tukey-kramer');

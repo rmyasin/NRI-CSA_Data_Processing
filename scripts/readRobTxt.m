@@ -1,16 +1,7 @@
+% Read a txt file of an experiment, convert it to a matlab struct of data
 function [output]=readRobTxt(folder,filename)
+%% Setup data structs
 titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','string_status','text','allow_points'};
-
-[~,dataFolderName]=fileparts(folder);
-
-robfile=fopen([folder filesep filename]);
-line=fgetl(robfile);
-if length(line)>6 && strcmp(line(1:7),'Version')
-    vProtocol=str2num(line(9:end));
-    line=fgetl(robfile);
-else
-    vProtocol=1;
-end
 
 micronNames={'micronA','micronB','micronC','micronD','micronRef','PROBE_A','PROBE_B','PROBE_C','PROBE_D','Ref'};
 foundLabels=[50,51,52,53,60,50,51,52,53,60];
@@ -66,6 +57,19 @@ buttons.clutch.push=[];
 allow_points.time=[];
 allow_points.data=[];
 
+%% Start file reading
+[~,dataFolderName]=fileparts(folder);
+
+robfile=fopen([folder filesep filename]);
+line=fgetl(robfile);
+if length(line)>6 && strcmp(line(1:7),'Version')
+    vProtocol=str2num(line(9:end));
+    line=fgetl(robfile);
+else
+    vProtocol=1;
+end
+
+%% Read data depending on title name
 while line~=-1
     temp=find(strcmp(line,titleList));
     if temp
@@ -155,9 +159,9 @@ while line~=-1
     line=fgetl(robfile);
 end
 
-%%
 fclose(robfile);
 
+%% Construct output data struct
 dataList={cur,des,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,text,allow_points,vProtocol};
 titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','text','allow_points','version'};
 output=cell2struct(dataList,titleList,2);

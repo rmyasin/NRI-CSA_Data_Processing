@@ -1,3 +1,20 @@
+% Function to return experiment info from a particular folder of a user's data
+% % Inputs
+% dataFolder - full path to the data folder
+% % Outputs
+% expOrgan - cell array of organ labels used for each experiment
+% expName - data name of each experiment's .txt file
+% regTimes - time of most recent organ registration at experiment start
+% regNames - name of registration folder containing recent registration
+
+% expOrgan and expName are always 6x1 vectors
+%   Index 1: unaided ablation Experiment
+%   Index 2: visual ablation Experiment
+%   Index 3: direct FB ablation Experiment
+%   Index 4: automated FB ablation Experiment
+%   Index 5: haptic feedback palpation Experiment
+%   Index 6: visual feedback palpation Experiment
+
 function [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder)
 contents=dir(dataFolder);
 regTimes=[];
@@ -8,6 +25,7 @@ for ii=1:6
     expName{ii}={};
 end
 
+% For each file/folder, save the information to the appropriate variable
 for ii=1:length(contents)
     key = contents(ii).name;
     if startsWith(key,'Registration')
