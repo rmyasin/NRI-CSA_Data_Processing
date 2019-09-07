@@ -220,7 +220,7 @@ for ii=5:6
         regFolder=regNames{registrationIndex};
 
         % Get Sphere Points
-        [spheresInRobot,H1,sphereRaw] = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
+        [spheresInRobot,~,H1,sphereRaw] = getSpherePoints([dataFolder filesep regFolder],organLabel,featureFolder);
 
         % Get selected POI times
         savedPoints=output.display_points.data{end}';

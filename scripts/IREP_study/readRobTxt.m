@@ -1,7 +1,21 @@
-% Read a txt file of an experiment, convert it to a matlab struct of data
 function [output]=readRobTxt(folder,filename)
-%% Setup data structs
-titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','string_status','text','allow_points'};
+if nargin<2
+    robfile=fopen(folder); %presume full filepath has been given
+    [~,dataFolderName]=fileparts(fileparts(folder));
+else
+    [~,dataFolderName]=fileparts(folder);
+    robfile=fopen([folder filesep filename]);
+end
+titleList={'psm_cur','psm_des','micron','psm_joint','camera','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','cam_minus','cam_plus','clutch','coag','display_points','artery_status','string_status','text','allow_points','force_gt','mag_pos_cur','mag_vec_cur'};
+
+
+line=fgetl(robfile);
+if length(line)>6 && strcmp(line(1:7),'Version')
+    vProtocol=str2num(line(9:end));
+    line=fgetl(robfile);
+else
+    vProtocol=1;
+end
 
 micronNames={'micronA','micronB','micronC','micronD','micronRef','PROBE_A','PROBE_B','PROBE_C','PROBE_D','Ref'};
 foundLabels=[50,51,52,53,60,50,51,52,53,60];
@@ -17,6 +31,9 @@ mtm.time=[];
 mtm.pos=[];
 force.time=[];
 force.data=[];
+
+force_gt.time=[];
+force_gt.data=[];
 
 display_points.time=[];
 display_points.data={};
@@ -57,19 +74,11 @@ buttons.clutch.push=[];
 allow_points.time=[];
 allow_points.data=[];
 
-%% Start file reading
-[~,dataFolderName]=fileparts(folder);
+mag_pos.time=[];
+mag_pos.data=[];
+mag_vec.time=[];
+mag_vec.data=[];
 
-robfile=fopen([folder filesep filename]);
-line=fgetl(robfile);
-if length(line)>6 && strcmp(line(1:7),'Version')
-    vProtocol=str2num(line(9:end));
-    line=fgetl(robfile);
-else
-    vProtocol=1;
-end
-
-%% Read data depending on title name
 while line~=-1
     temp=find(strcmp(line,titleList));
     if temp
@@ -153,17 +162,25 @@ while line~=-1
                 timeIndex=strfind(line,' ');
                 allow_points.time=[allow_points.time;str2num(line(2:timeIndex-1))];
                 allow_points.data=[allow_points.data;strcmp(line(timeIndex(1)+1:end),'True')];
-
+            case 21 %force_gt
+                force_gt.time=[force_gt.time;numLine(1)];
+                force_gt.data=[force_gt.data;numLine(2:end)];
+            case 22 %mag_pos
+                mag_pos.time=[mag_pos.time;numLine(1)];
+                mag_pos.data=[mag_pos.data;numLine(2:end)];
+            case 23 %mag_vec
+                mag_vec.time=[mag_vec.time;numLine(1)];
+                mag_vec.data=[mag_vec.data;numLine(2:end)];
         end
     end
     line=fgetl(robfile);
 end
 
+%%
 fclose(robfile);
 
-%% Construct output data struct
-dataList={cur,des,joint,mtm,force,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,text,allow_points,vProtocol};
-titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','text','allow_points','version'};
+dataList={cur,des,joint,mtm,force,force_gt,micronTip,micronValid,poiClear,poiPoints,buttons,display_points,artery_status,string_status,text,allow_points,mag_pos,mag_vec,vProtocol};
+titleList={'psm_cur','psm_des','psm_joint','mtm_cur','force','force_gt','micronTip','micronValid','poi_clear','poi_points','buttons','display_points','artery_status','string_status','text','allow_points','mag_pos','mag_vec','version'};
 output=cell2struct(dataList,titleList,2);
 
 output.userNumber=str2double(dataFolderName(5:end));
