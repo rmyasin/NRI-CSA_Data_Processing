@@ -290,6 +290,7 @@ saveFigPDF('StudyPalpationForcesAuto.pdf')
 
 % Variance is significantly lower
 forceAutoVec=[VSForce',FSForce',GTForce',ablateB1Output.meanAppliedVerticalForce];
+forceAutoVec=abs([VSForce',FSForce',GTForce',ablateB1Output.meanAppliedVerticalForce]-0.75);
 forceAutoCat = [repmat({'Unaided'},length(VSForce),1);
     repmat({'Sensed'},length(FSForce),1);
     repmat({'Ground Truth'},length(GTForce),1);

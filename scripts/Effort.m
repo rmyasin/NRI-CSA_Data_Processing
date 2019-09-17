@@ -169,8 +169,8 @@ ablationVec=[Effort_Ablation1;Effort_Ablation2;Effort_Ablation3;Effort_Ablation4
 ablationCell={Effort_Ablation1,Effort_Ablation2,Effort_Ablation3,Effort_Ablation4};
 ablationCategory = [repmat({['Unaided']},length(ablationCell{1}),1);
                     repmat({['Visual']},length(ablationCell{2}),1);
-                    repmat({['Haptic VF']},length(ablationCell{3}),1);
-                    repmat({['Auto VF']},length(ablationCell{4}),1)];
+                    repmat({['Bilateral']},length(ablationCell{3}),1);
+                    repmat({['FRMM']},length(ablationCell{4}),1)];
 % figure
 % myBoxPlot(ablationCell,ablationCategory)
 % title('Perceived User Ablation Effort')
@@ -185,8 +185,8 @@ pValAblation = c(:,end)
 
 palpationVec=[Effort_Palpation1;Effort_Palpation2];
 palpationCell={Effort_Palpation1,Effort_Palpation2};
-palpationCategory = [repmat({['Force FB']},length(palpationCell{1}),1);
-                    repmat({['Visual FB']},length(palpationCell{2}),1)];
+palpationCategory = [repmat({['Bilateral']},length(palpationCell{1}),1);
+                    repmat({['Overlay']},length(palpationCell{2}),1)];
 % figure
 % myBoxPlot(palpationCell,palpationCategory)
 % title('Perceived User Palpation Effort')

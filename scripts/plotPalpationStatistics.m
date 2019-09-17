@@ -53,7 +53,7 @@ tmp=[palpationMetrics(:,2).centerDistances];
 distanceGPCenter=vertcat(tmp{:});
 distanceCenterCell={distanceHapticCenter,distanceGPCenter};
 %% Plot Artery Results (boxplots)
-expNames={'Force FB','Visual FB'};
+expNames={'Bilateral','FRMM+Overlay'};
 % 
 % figure
 % myBoxPlot(foundCell,expNames)
