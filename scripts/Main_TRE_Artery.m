@@ -13,9 +13,10 @@ yMicron=[mean(mic.pos{1})', mean(mic.pos{2})', mean(mic.pos{3})' , mean(mic.pos{
 [R,t]=rigidPointRegistration(x,y);
 FLE = mean(colNorm(y-(R*x+t))); %in meters
 
+%     0.0023
 [R2,t2]=rigidPointRegistration(x,yMicron);
 FLE_micron = mean(colNorm(yMicron-(R2*x+t2))); %in meters
-
+% 4.3504e-04
 
 cpd_dir=getenv('CPDREG');
 featureFolder =[ cpd_dir filesep 'userstudy_data' filesep 'PLY'];
@@ -36,4 +37,4 @@ TRE_RMS = mean(treapprox(x,arteryPointsRaw,FLE))
 
 TRE_RMS_Micron = mean(treapprox(x,arteryPointsRaw,FLE_micron))
 
-% Mean TRE is 2mm with robot, 0.4 mm with micron
+% Mean TRE is 1.9mm with robot, 0.4 mm with micron
