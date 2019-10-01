@@ -10,7 +10,7 @@ plotOption=false;
 % baseFolder='R:\Projects\NRI\User_Study\Data\JHU\user';
 % baseFolder='R:\Projects\NRI\User_Study\Data\CMU\user';
 baseFolder='R:\Projects\NRI\User_Study\Data\combined\user';
-arteryExperiments=1:4;
+arteryExperiments=[];%1:4;
 palpationExperiments=5:6;
 userList=[1:16,19:26]; %All data
 % userList=1:8; %VU data
@@ -47,20 +47,20 @@ for userNumber=userList
     [expOrgan,expName,regTimes,regNames]=getExperimentFiles(dataFolder);
     
     %CMU data manual fixes for missing datasets or mislabelled organs
-    if userNumber==17
-        arteryExperiments=[1:2,4];
-    elseif userNumber==18
-        arteryExperiments=1:2;
-        expOrgan{5}{3}='21';
-    elseif userNumber==20 
-        expOrgan{6}{4}='21';
-    elseif userNumber==25
-        expOrgan{6}{4}='21';
-    elseif userNumber==26
-        expOrgan{6}{1}='11';
-    else
-        arteryExperiments=1:4;
-    end
+%     if userNumber==17
+%         arteryExperiments=[1:2,4];
+%     elseif userNumber==18
+%         arteryExperiments=1:2;
+%         expOrgan{5}{3}='21';
+%     elseif userNumber==20 
+%         expOrgan{6}{4}='21';
+%     elseif userNumber==25
+%         expOrgan{6}{4}='21';
+%     elseif userNumber==26
+%         expOrgan{6}{1}='11';
+%     else
+%         arteryExperiments=1:4;
+%     end
     
     %% Process artery-following experiments
     for ii=arteryExperiments
@@ -80,7 +80,7 @@ end
 
 %% Plot statistics
 % load('arteryMetrics')
-plotArteryStatistics(arteryMetrics)
+% plotArteryStatistics(arteryMetrics)
 % save('arteryMetrics','arteryMetrics')
 
 % load('palpationMetrics')

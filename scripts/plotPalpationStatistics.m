@@ -7,11 +7,11 @@ timeCategory = [repmat({'Haptic'},length([palpationMetrics(:,1).completionTime])
 timeCell={[palpationMetrics(:,1).completionTime],[palpationMetrics(:,2).completionTime]};
 
 % How many spheres were found
-foundHaptic=([palpationMetrics(:,1).spheresFound])./[palpationMetrics(:,1).spheresTotal];
-foundGP=([palpationMetrics(:,2).spheresFound])./[palpationMetrics(:,2).spheresTotal];
+foundHaptic=([palpationMetrics(:,1).spheresFound])./[palpationMetrics(:,1).N_GTSpheres];
+foundGP=([palpationMetrics(:,2).spheresFound])./[palpationMetrics(:,2).N_GTSpheres];
 foundCell={foundHaptic,foundGP};
-foundHaptic=([palpationMetrics(:,1).spheresFoundCenter])./[palpationMetrics(:,1).spheresTotal];
-foundGP=([palpationMetrics(:,2).spheresFoundCenter])./[palpationMetrics(:,2).spheresTotal];
+foundHaptic=([palpationMetrics(:,1).spheresFoundCenter])./[palpationMetrics(:,1).N_GTSpheres];
+foundGP=([palpationMetrics(:,2).spheresFoundCenter])./[palpationMetrics(:,2).N_GTSpheres];
 foundCellCenter={foundHaptic,foundGP};
 
 % How many extra spheres were found
@@ -21,6 +21,9 @@ extraCell={extraHaptic,extraGP};
 extraHaptic=([palpationMetrics(:,1).extraSelectCenter]);
 extraGP=([palpationMetrics(:,2).extraSelectCenter]);
 extraCellCenter={extraHaptic,extraGP};
+extraVec = [foundCellCenter{1};foundCellCenter{2}];
+extraCategory = [repmat({'Haptic'},length(foundCellCenter{1}),1);
+                    repmat({'Visual'},length(foundCellCenter{2}),1)];
 
 % Distances for "found" tumors
 tmp=[palpationMetrics(:,1).closeDist];
@@ -129,10 +132,19 @@ figure
 c=multcompare(stats)
 title('Completion Time')
 
+% figure
+% [p,tbl,stats]=anova1(distVec,distCategory,'off');
+% c=multcompare(stats)
+% title('Distance From GT')
+
 figure
-[p,tbl,stats]=anova1(distVec,distCategory,'off');
+[p,tbl,stats]=anova1(extraVec,extraCategory,'off');
 c=multcompare(stats)
-title('Distance From GT')
+title('Additional Features')
 
+foundVec = [foundCellCenter{1}, foundCellCenter{2}]
 
+figure
+
+title('Percent Found')
 end

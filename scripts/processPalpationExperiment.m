@@ -194,6 +194,7 @@ for jj=1:length(expOrgan{ii})
     NExtraPointsCenter(jj) = NpointsCenterNotClosest;
     closeDist{jj} = closeDistances;
     closeDistCenter{jj} = closeDistancesCenter;
+    gtSpheres(jj) = size(spheresInRobot,2);
 end
 
 metrics.completionTime=experimentLengthInS;
@@ -205,6 +206,7 @@ metrics.spheresFoundCenter=NsphereFoundCenterList;
 metrics.spheresTotal=totalSphereList;
 metrics.extraSelect = NExtraPoints;
 metrics.extraSelectCenter = NExtraPointsCenter;
+metrics.N_GTSpheres = gtSpheres;
 
 metrics.closeDist = closeDist;
 metrics.closeDistCenter = closeDistCenter;
