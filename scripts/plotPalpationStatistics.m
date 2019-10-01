@@ -21,7 +21,7 @@ extraCell={extraHaptic,extraGP};
 extraHaptic=([palpationMetrics(:,1).extraSelectCenter]);
 extraGP=([palpationMetrics(:,2).extraSelectCenter]);
 extraCellCenter={extraHaptic,extraGP};
-extraVec = [foundCellCenter{1};foundCellCenter{2}];
+extraVec = [foundCellCenter{1},foundCellCenter{2}];
 extraCategory = [repmat({'Haptic'},length(foundCellCenter{1}),1);
                     repmat({'Visual'},length(foundCellCenter{2}),1)];
 
@@ -143,8 +143,13 @@ c=multcompare(stats)
 title('Additional Features')
 
 foundVec = [foundCellCenter{1}, foundCellCenter{2}]
+foundCategory = [repmat({'Haptic'},length(foundCellCenter{1}),1);
+                    repmat({'Visual'},length(foundCellCenter{2}),1)];
 
 figure
+[p,tbl,stats]=anova1(foundVec,foundCategory,'off');
+c=multcompare(stats)
+title('Additional Features')
 
 title('Percent Found')
 end
